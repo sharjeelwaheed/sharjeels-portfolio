@@ -35,5 +35,10 @@ app.use('/api/upload', uploadRoutes)
 
 app.use(errorHandler)
 
-const PORT = process.env.PORT || 5000
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`))
+// Local dev: listen on port. Vercel: export app as serverless function.
+if (require.main === module) {
+  const PORT = process.env.PORT || 5001
+  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`))
+}
+
+module.exports = app
