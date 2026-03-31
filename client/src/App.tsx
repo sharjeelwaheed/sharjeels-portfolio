@@ -1,17 +1,20 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AnimatePresence } from 'framer-motion'
 import { Toaster } from 'react-hot-toast'
 
 import HomePage from '@/pages/HomePage'
-import AdminLoginPage from '@/pages/AdminLoginPage'
-import AdminDashboardPage from '@/pages/AdminDashboardPage'
-import AdminProjectsPage from '@/pages/AdminProjectsPage'
-import AdminSkillsPage from '@/pages/AdminSkillsPage'
-import AdminAboutPage from '@/pages/AdminAboutPage'
-import AdminTimelinePage from '@/pages/AdminTimelinePage'
-import AdminLayout from '@/components/admin/AdminLayout'
-import ProtectedRoute from '@/components/admin/ProtectedRoute'
 import CustomCursor from '@/components/ui/CustomCursor'
+
+// Lazy load admin — not bundled with public portfolio
+const AdminLoginPage = lazy(() => import('@/pages/AdminLoginPage'))
+const AdminDashboardPage = lazy(() => import('@/pages/AdminDashboardPage'))
+const AdminProjectsPage = lazy(() => import('@/pages/AdminProjectsPage'))
+const AdminSkillsPage = lazy(() => import('@/pages/AdminSkillsPage'))
+const AdminAboutPage = lazy(() => import('@/pages/AdminAboutPage'))
+const AdminTimelinePage = lazy(() => import('@/pages/AdminTimelinePage'))
+const AdminLayout = lazy(() => import('@/components/admin/AdminLayout'))
+const ProtectedRoute = lazy(() => import('@/components/admin/ProtectedRoute'))
 
 export default function App() {
   return (
@@ -31,20 +34,22 @@ export default function App() {
       <AnimatePresence mode="wait">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin/login" element={<Suspense fallback={null}><AdminLoginPage /></Suspense>} />
           <Route
             path="/admin"
             element={
-              <ProtectedRoute>
-                <AdminLayout />
-              </ProtectedRoute>
+              <Suspense fallback={null}>
+                <ProtectedRoute>
+                  <AdminLayout />
+                </ProtectedRoute>
+              </Suspense>
             }
           >
-            <Route index element={<AdminDashboardPage />} />
-            <Route path="projects" element={<AdminProjectsPage />} />
-            <Route path="skills" element={<AdminSkillsPage />} />
-            <Route path="about" element={<AdminAboutPage />} />
-            <Route path="timeline" element={<AdminTimelinePage />} />
+            <Route index element={<Suspense fallback={null}><AdminDashboardPage /></Suspense>} />
+            <Route path="projects" element={<Suspense fallback={null}><AdminProjectsPage /></Suspense>} />
+            <Route path="skills" element={<Suspense fallback={null}><AdminSkillsPage /></Suspense>} />
+            <Route path="about" element={<Suspense fallback={null}><AdminAboutPage /></Suspense>} />
+            <Route path="timeline" element={<Suspense fallback={null}><AdminTimelinePage /></Suspense>} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
