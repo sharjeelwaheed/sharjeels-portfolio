@@ -3,3 +3,4 @@ node_modules/
 .env.local
 dist/
 .DS_Store
+# Keep .env.production (no secrets, just public API URL)
