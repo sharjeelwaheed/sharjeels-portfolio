@@ -32,13 +32,13 @@ const cardVariants = {
     transition: {
       delay: i * 0.08,
       duration: 0.65,
-      ease: [0.16, 1, 0.3, 1],
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
     },
   }),
   exit: {
     opacity: 0,
     y: -20,
-    transition: { duration: 0.2, ease: 'easeIn' },
+    transition: { duration: 0.2 },
   },
 }
 
