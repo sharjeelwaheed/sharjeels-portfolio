@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react'
-import { motion, AnimatePresence, useInView } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ExternalLink, ArrowUpRight } from 'lucide-react'
 import { GithubIcon } from '@/components/ui/SocialIcons'
 import SectionHeading from '@/components/ui/SectionHeading'
@@ -18,20 +18,14 @@ interface Project {
   featured?: boolean
 }
 
-// Card animates in with a clip-path reveal — the way premium agencies do it
 const cardVariants = {
-  hidden: {
-    opacity: 0,
-    y: 60,
-    clipPath: 'inset(100% 0% 0% 0%)',
-  },
+  hidden: { opacity: 0, y: 40 },
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    clipPath: 'inset(0% 0% 0% 0%)',
     transition: {
       delay: i * 0.08,
-      duration: 0.65,
+      duration: 0.5,
       ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
     },
   }),
@@ -178,9 +172,6 @@ export default function ProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([])
   const [activeCategory, setActiveCategory] = useState('all')
   const [loading, setLoading] = useState(true)
-  const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, amount: 0.1 })
-
   useEffect(() => {
     api.get('/projects')
       .then((r: { data: Project[] }) => { setProjects(r.data); setLoading(false) })
@@ -193,7 +184,7 @@ export default function ProjectsSection() {
 
   return (
     <section id="projects" className="section-padding" style={{ background: '#0e0e0e' }}>
-      <div className="max-w-7xl mx-auto" ref={ref}>
+      <div className="max-w-7xl mx-auto">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">

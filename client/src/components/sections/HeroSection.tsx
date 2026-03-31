@@ -27,6 +27,8 @@ export default function HeroSection({ ready = true }: { ready?: boolean }) {
         style={{
           background: 'radial-gradient(circle, rgba(255,77,0,0.07) 0%, transparent 70%)',
           filter: 'blur(80px)',
+          willChange: 'transform',
+          transform: 'translateZ(0)',
         }}
       />
 
@@ -213,6 +215,8 @@ export default function HeroSection({ ready = true }: { ready?: boolean }) {
             style={{
               background: 'radial-gradient(circle at 55% 45%, rgba(255,77,0,0.18) 0%, transparent 65%)',
               filter: 'blur(40px)',
+              willChange: 'transform',
+              transform: 'translateZ(0)',
             }}
           />
 
