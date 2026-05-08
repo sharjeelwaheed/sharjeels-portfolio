@@ -61,14 +61,14 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       }}
     >
       {/* Image */}
-      <div className="relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
+      <div className="relative overflow-hidden" style={{ aspectRatio: '16/9', background: '#0a0a0a' }}>
         {project.imageUrl ? (
           <motion.img
             src={project.imageUrl}
             alt={project.title}
             loading="lazy"
-            className="w-full h-full object-cover"
-            animate={{ scale: hovered ? 1.08 : 1 }}
+            className="w-full h-full object-contain"
+            animate={{ scale: hovered ? 1.04 : 1 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           />
         ) : (
