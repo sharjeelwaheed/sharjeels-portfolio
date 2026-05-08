@@ -8,6 +8,7 @@ import AboutSection from '@/components/sections/AboutSection'
 import ProjectsSection from '@/components/sections/ProjectsSection'
 import SkillsSection from '@/components/sections/SkillsSection'
 import TimelineSection from '@/components/sections/TimelineSection'
+import ServicesSection from '@/components/sections/ServicesSection'
 import ContactSection from '@/components/sections/ContactSection'
 
 export default function HomePage() {
@@ -23,6 +24,7 @@ export default function HomePage() {
           <main>
             <HeroSection ready={ready} />
             <AboutSection />
+            <ServicesSection />
             <ProjectsSection />
             <SkillsSection />
             <TimelineSection />
