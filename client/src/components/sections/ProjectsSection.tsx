@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ExternalLink, ArrowUpRight } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { ArrowUpRight } from 'lucide-react'
 import { GithubIcon } from '@/components/ui/SocialIcons'
 import SectionHeading from '@/components/ui/SectionHeading'
-import { PROJECT_CATEGORIES, TECH_COLORS } from '@/utils/constants'
+import { TECH_COLORS } from '@/utils/constants'
 import api from '@/utils/api'
 
 interface Project {
@@ -18,237 +19,247 @@ interface Project {
   featured?: boolean
 }
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: (i: number) => ({
-    opacity: 1,
-    y: 0,
-    transition: {
-      delay: i * 0.08,
-      duration: 0.5,
-      ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
-    },
-  }),
-  exit: {
-    opacity: 0,
-    y: -20,
-    transition: { duration: 0.2 },
-  },
-}
-
-function ProjectCard({ project, index }: { project: Project; index: number }) {
-  const [hovered, setHovered] = useState(false)
-
-  return (
-    <motion.div
-      custom={index}
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
-      className="rounded-2xl overflow-hidden cursor-pointer relative"
-      style={{
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.07)',
-      }}
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      whileHover={{
-        y: -10,
-        borderColor: 'rgba(255,77,0,0.3)',
-        boxShadow: '0 30px 60px rgba(255,77,0,0.1)',
-        transition: { duration: 0.3, ease: 'easeOut' },
-      }}
-    >
-      {/* Image */}
-      <div className="relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
-        {project.imageUrl ? (
-          <motion.img
-            src={project.imageUrl}
-            alt={project.title}
-            loading="lazy"
-            className="w-full h-full object-cover"
-            animate={{ scale: hovered ? 1.08 : 1 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          />
-        ) : (
-          <div
-            className="w-full h-full flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #1a0800, #2d1000)' }}
-          >
-            <span
-              className="font-heading font-bold text-6xl opacity-20"
-              style={{ background: 'linear-gradient(135deg,#FF4D00,#FF2D55)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-            >
-              {project.title[0]}
-            </span>
-          </div>
-        )}
-
-        {/* Dark overlay on hover with action links */}
-        <motion.div
-          className="absolute inset-0 flex items-end justify-between p-4"
-          style={{ background: 'linear-gradient(to top, rgba(11,11,11,0.95) 0%, transparent 60%)' }}
-          animate={{ opacity: hovered ? 1 : 0 }}
-          transition={{ duration: 0.25 }}
-        >
-          <div className="flex gap-2">
-            {project.liveUrl && (
-              <a
-                href={project.liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-body text-white"
-                style={{ background: 'linear-gradient(135deg, #FF4D00, #FF2D55)' }}
-              >
-                Live <ArrowUpRight size={12} />
-              </a>
-            )}
-            {project.githubUrl && (
-              <a
-                href={project.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-body text-white/80 hover:text-white"
-                style={{ background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)' }}
-              >
-                <GithubIcon size={12} /> Code
-              </a>
-            )}
-          </div>
-          {project.featured && (
-            <span className="px-2 py-0.5 rounded-full text-xs font-body text-white/60" style={{ background: 'rgba(255,255,255,0.08)' }}>
-              Featured
-            </span>
-          )}
-        </motion.div>
-      </div>
-
-      {/* Info */}
-      <div className="p-5">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3
-            className="font-heading font-bold text-white text-xl leading-tight"
-            style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
-          >
-            {project.title}
-          </h3>
-          <motion.div
-            animate={{ rotate: hovered ? 45 : 0, color: hovered ? '#FF4D00' : 'rgba(255,255,255,0.2)' }}
-            transition={{ duration: 0.2 }}
-            className="flex-shrink-0 mt-1"
-          >
-            <ExternalLink size={16} />
-          </motion.div>
-        </div>
-
-        <p className="text-white/40 font-body text-sm leading-relaxed mb-4 line-clamp-2">
-          {project.description}
-        </p>
-
-        <div className="flex flex-wrap gap-1.5">
-          {project.techStack.slice(0, 4).map((tech) => (
-            <span
-              key={tech}
-              className="px-2 py-0.5 rounded text-xs font-body"
-              style={{
-                color: TECH_COLORS[tech] || 'rgba(255,255,255,0.5)',
-                background: `${TECH_COLORS[tech] || '#ffffff'}10`,
-                border: `1px solid ${TECH_COLORS[tech] || '#ffffff'}20`,
-              }}
-            >
-              {tech}
-            </span>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
 export default function ProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([])
-  const [activeCategory, setActiveCategory] = useState('all')
   const [loading, setLoading] = useState(true)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const cardsRef = useRef<HTMLDivElement[]>([])
+
   useEffect(() => {
     api.get('/projects')
       .then((r: { data: Project[] }) => { setProjects(r.data); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
 
-  const filtered = activeCategory === 'all'
-    ? projects
-    : projects.filter((p) => p.category === activeCategory)
+  useEffect(() => {
+    if (loading || projects.length === 0) return
+
+    // small delay so DOM is fully painted
+    const timer = setTimeout(() => {
+      const ctx = gsap.context(() => {
+        const cards = cardsRef.current.filter(Boolean)
+        const total = cards.length
+
+        cards.forEach((card, i) => {
+          const isLast = i === total - 1
+
+          ScrollTrigger.create({
+            trigger: card,
+            start: 'top top',
+            end: isLast ? 'bottom top' : `+=${window.innerHeight * 1.3}`,
+            pin: true,
+            pinSpacing: false,
+            scrub: true,
+          })
+
+          if (!isLast) {
+            gsap.to(card, {
+              scale: 0.93,
+              opacity: 0.5,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: cards[i + 1],
+                start: 'top 75%',
+                end: 'top top',
+                scrub: 1,
+              },
+            })
+          }
+
+          if (i > 0) {
+            gsap.fromTo(
+              card,
+              { yPercent: 5, opacity: 0 },
+              {
+                yPercent: 0,
+                opacity: 1,
+                ease: 'power2.out',
+                scrollTrigger: {
+                  trigger: card,
+                  start: 'top 90%',
+                  end: 'top top',
+                  scrub: 1,
+                },
+              }
+            )
+          }
+        })
+
+        ScrollTrigger.refresh()
+      }, containerRef)
+
+      return () => ctx.revert()
+    }, 120)
+
+    return () => clearTimeout(timer)
+  }, [loading, projects])
 
   return (
-    <section id="projects" className="section-padding" style={{ background: '#0e0e0e' }}>
-      <div className="max-w-7xl mx-auto">
+    <section id="projects" ref={containerRef} style={{ background: '#0e0e0e' }}>
+      {/* Heading */}
+      <div
+        className="flex flex-col items-center justify-center"
+        style={{ height: '35vh', paddingTop: '6rem' }}
+      >
+        <SectionHeading label="My Work" title="Selected Projects" align="center" />
+      </div>
 
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <SectionHeading label="My Work" title="Selected Projects" />
-
-          {/* Filter tabs */}
-          <div className="flex flex-wrap gap-2">
-            {PROJECT_CATEGORIES.map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => setActiveCategory(cat.value)}
-                className="relative px-4 py-1.5 rounded-full text-sm font-body transition-colors duration-200"
+      {/* Stacked project cards */}
+      {loading ? (
+        <div className="flex items-center justify-center" style={{ height: '60vh' }}>
+          <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#FF4D00', borderTopColor: 'transparent' }} />
+        </div>
+      ) : (
+        <div style={{ paddingBottom: `${projects.length * 60}px` }}>
+          {projects.map((project, i) => (
+            <div
+              key={project._id}
+              ref={(el) => { if (el) cardsRef.current[i] = el }}
+              className="w-full flex items-center justify-center"
+              style={{ height: '100vh', top: 0, zIndex: 10 + i, padding: '0 1.5rem' }}
+            >
+              <div
+                className="w-full max-w-6xl rounded-3xl overflow-hidden relative"
                 style={{
-                  color: activeCategory === cat.value ? '#ffffff' : 'rgba(255,255,255,0.35)',
+                  background: 'linear-gradient(135deg, #111111 0%, #181818 100%)',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  boxShadow: '0 40px 80px rgba(0,0,0,0.6)',
+                  height: 'min(78vh, 560px)',
+                  display: 'flex',
+                  flexDirection: 'row',
                 }}
               >
-                {activeCategory === cat.value && (
-                  <motion.span
-                    layoutId="pill"
-                    className="absolute inset-0 rounded-full"
-                    style={{ background: 'linear-gradient(135deg, #FF4D00, #FF2D55)' }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                  />
-                )}
-                <span className="relative z-10">{cat.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Grid */}
-        {loading ? (
-          <div className="grid md:grid-cols-2 gap-6">
-            {[1, 2, 3, 4].map((n) => (
-              <div key={n} className="rounded-2xl animate-pulse" style={{ background: 'rgba(255,255,255,0.03)', aspectRatio: '4/3' }} />
-            ))}
-          </div>
-        ) : (
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeCategory}
-              className="grid md:grid-cols-2 gap-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              {filtered.length > 0 ? (
-                filtered.map((project, i) => (
-                  <ProjectCard key={project._id} project={project} index={i} />
-                ))
-              ) : (
-                <motion.p
-                  className="col-span-2 text-center text-white/30 font-body py-20"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                {/* Image side */}
+                <div
+                  className="relative overflow-hidden flex-shrink-0"
+                  style={{ width: '55%', height: '100%' }}
                 >
-                  No projects in this category yet.
-                </motion.p>
-              )}
-            </motion.div>
-          </AnimatePresence>
-        )}
-      </div>
+                  {project.imageUrl ? (
+                    <img
+                      src={project.imageUrl}
+                      alt={project.title}
+                      className="w-full h-full object-cover"
+                      style={{ transition: 'transform 0.6s ease' }}
+                    />
+                  ) : (
+                    <div
+                      className="w-full h-full flex items-center justify-center"
+                      style={{ background: 'linear-gradient(135deg, #1a0800, #2d1000)' }}
+                    >
+                      <span
+                        className="font-heading font-black text-8xl opacity-10"
+                        style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                      >
+                        {project.title[0]}
+                      </span>
+                    </div>
+                  )}
+                  {/* Gradient overlay on image */}
+                  <div
+                    className="absolute inset-0"
+                    style={{ background: 'linear-gradient(to right, transparent 60%, #111111 100%)' }}
+                  />
+                  {project.featured && (
+                    <div
+                      className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-body"
+                      style={{ background: 'rgba(255,77,0,0.15)', border: '1px solid rgba(255,77,0,0.3)', color: '#FF4D00' }}
+                    >
+                      Featured
+                    </div>
+                  )}
+                </div>
+
+                {/* Content side */}
+                <div
+                  className="flex flex-col justify-center flex-1 relative z-10"
+                  style={{ padding: 'clamp(1.5rem, 3vw, 3rem)', paddingLeft: 'clamp(1rem, 2vw, 2rem)' }}
+                >
+                  {/* Project number */}
+                  <span
+                    className="font-heading font-black leading-none mb-4 select-none block"
+                    style={{
+                      fontSize: 'clamp(3rem, 6vw, 5.5rem)',
+                      fontFamily: "'Bricolage Grotesque', sans-serif",
+                      background: 'linear-gradient(135deg, #FF4D00 0%, #FF2D55 100%)',
+                      WebkitBackgroundClip: 'text',
+                      WebkitTextFillColor: 'transparent',
+                      letterSpacing: '-0.04em',
+                      opacity: 0.85,
+                    }}
+                  >
+                    {String(i + 1).padStart(2, '0')}
+                  </span>
+
+                  <h3
+                    className="font-heading font-bold text-white leading-tight mb-3"
+                    style={{
+                      fontSize: 'clamp(1.4rem, 2.5vw, 2.2rem)',
+                      fontFamily: "'Bricolage Grotesque', sans-serif",
+                      letterSpacing: '-0.02em',
+                    }}
+                  >
+                    {project.title}
+                  </h3>
+
+                  <p
+                    className="font-body leading-relaxed mb-5"
+                    style={{
+                      fontSize: 'clamp(0.82rem, 1.2vw, 0.95rem)',
+                      color: 'rgba(255,255,255,0.4)',
+                      maxWidth: '380px',
+                    }}
+                  >
+                    {project.description}
+                  </p>
+
+                  {/* Tech tags */}
+                  <div className="flex flex-wrap gap-1.5 mb-6">
+                    {project.techStack.slice(0, 4).map((tech) => (
+                      <span
+                        key={tech}
+                        className="px-2 py-0.5 rounded text-xs font-body"
+                        style={{
+                          color: TECH_COLORS[tech] || 'rgba(255,255,255,0.5)',
+                          background: `${TECH_COLORS[tech] || '#ffffff'}10`,
+                          border: `1px solid ${TECH_COLORS[tech] || '#ffffff'}20`,
+                        }}
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+
+                  {/* Links */}
+                  <div className="flex gap-3">
+                    {project.liveUrl && (
+                      <a
+                        href={project.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-body text-white"
+                        style={{ background: 'linear-gradient(135deg, #FF4D00, #FF2D55)' }}
+                      >
+                        Live <ArrowUpRight size={14} />
+                      </a>
+                    )}
+                    {project.githubUrl && (
+                      <a
+                        href={project.githubUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-body text-white/70 hover:text-white"
+                        style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
+                      >
+                        <GithubIcon size={14} /> Code
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   )
 }

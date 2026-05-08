@@ -1,9 +1,13 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import Lenis from '@studio-freight/lenis'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import './index.css'
 import App from './App'
 import { AuthProvider } from './context/AuthContext'
+
+gsap.registerPlugin(ScrollTrigger)
 
 // Initialize Lenis smooth scroll
 const lenis = new Lenis({
@@ -16,11 +20,10 @@ const lenis = new Lenis({
 // Expose lenis globally so Navbar can call lenis.scrollTo
 ;(window as unknown as { lenis: Lenis }).lenis = lenis
 
-function raf(time: number) {
-  lenis.raf(time)
-  requestAnimationFrame(raf)
-}
-requestAnimationFrame(raf)
+// Drive Lenis via GSAP ticker so ScrollTrigger stays in sync
+gsap.ticker.add((time) => lenis.raf(time * 1000))
+gsap.ticker.lagSmoothing(0)
+lenis.on('scroll', ScrollTrigger.update)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
