@@ -41,24 +41,49 @@ const SERVICES = [
 ]
 
 export default function ServicesSection() {
-  const cardInnerRefs = useRef<HTMLDivElement[]>([])
+  // sectionRef = the tall scrollable area that drives the animation
+  const sectionRef = useRef<HTMLDivElement>(null)
+  // cardsRef = the absolutely-positioned card layers inside the sticky viewport
+  const cardsRef = useRef<HTMLDivElement[]>([])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      cardInnerRefs.current.filter(Boolean).forEach((inner, i) => {
-        const total = cardInnerRefs.current.length
-        if (i === total - 1) return
+      const cards = cardsRef.current.filter(Boolean)
+      const vh = window.innerHeight
 
-        // Scale + dim current card as the next one scrolls over it
-        gsap.to(inner, {
-          scale: 0.93,
+      cards.forEach((card, i) => {
+        if (i === 0) return
+
+        // Pixel offset into the section where this card starts sliding in
+        const scrollStart = (i - 1) * vh
+        const scrollEnd   = scrollStart + vh * 0.65 // card fully arrives after 65vh of scroll
+
+        // ── Incoming card slides up from below (scrubbed) ──
+        gsap.fromTo(
+          card,
+          { yPercent: 100 },
+          {
+            yPercent: 0,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: `top+=${scrollStart}px top`,
+              end:   `top+=${scrollEnd}px top`,
+              scrub: 1.5,   // ← adjust for faster (lower) / smoother (higher) feel
+            },
+          }
+        )
+
+        // ── Previous card scales down + dims as new one arrives ──
+        gsap.to(cards[i - 1], {
+          scale:   0.92,
           opacity: 0.45,
-          ease: 'none',
+          ease:    'none',
           scrollTrigger: {
-            trigger: inner,
-            start: 'top top',
-            end: 'bottom top',
-            scrub: 1,
+            trigger: sectionRef.current,
+            start: `top+=${scrollStart}px top`,
+            end:   `top+=${scrollEnd}px top`,
+            scrub: 1.5,
           },
         })
       })
@@ -69,7 +94,8 @@ export default function ServicesSection() {
 
   return (
     <section id="services" style={{ background: '#ffffff' }}>
-      {/* Heading */}
+
+      {/* ── Section heading — scrolls normally before sticky kicks in ── */}
       <div
         className="flex flex-col items-center justify-center"
         style={{ height: '40vh', paddingTop: '5rem' }}
@@ -93,124 +119,145 @@ export default function ServicesSection() {
         </h2>
       </div>
 
-      {/* Each card wrapper is 100vh — CSS sticky does the stacking */}
-      {SERVICES.map((service, i) => (
-        <div key={service.number} style={{ height: '100vh' }}>
-          <div
-            ref={(el) => { if (el) cardInnerRefs.current[i] = el }}
-            className="w-full flex items-center justify-center"
-            style={{
-              position: 'sticky',
-              top: 0,
-              height: '100vh',
-              zIndex: 10 + i,
-              padding: '0 1.5rem',
-            }}
-          >
+      {/* ── Scrollable driver — height = N cards × 100vh ── */}
+      {/* This div provides the scroll distance; the sticky inner pins at top:0 */}
+      <div
+        ref={sectionRef}
+        style={{ height: `${SERVICES.length * 100}vh`, position: 'relative' }}
+      >
+        {/* ── Single sticky viewport — cards stack inside here ── */}
+        <div
+          style={{
+            position: 'sticky',
+            top: 0,
+            height: '100vh',
+            overflow: 'hidden',
+          }}
+        >
+          {SERVICES.map((service, i) => (
             <div
-              className="w-full max-w-5xl rounded-3xl relative overflow-hidden"
+              key={service.number}
+              ref={(el) => { if (el) cardsRef.current[i] = el }}
               style={{
-                background: i % 2 === 0 ? '#f7f7f7' : '#efefef',
-                border: '1px solid rgba(0,0,0,0.07)',
-                padding: 'clamp(2rem, 5vw, 4rem)',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.07)',
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '0 1.5rem',
               }}
             >
               <div
-                className="absolute top-0 left-0 w-64 h-64 rounded-full pointer-events-none"
+                className="w-full max-w-5xl rounded-3xl relative overflow-hidden"
                 style={{
-                  background: 'radial-gradient(circle, rgba(255,77,0,0.05) 0%, transparent 70%)',
-                  transform: 'translate(-30%,-30%)',
+                  background: i % 2 === 0 ? '#f7f7f7' : '#efefef',
+                  border: '1px solid rgba(0,0,0,0.07)',
+                  padding: 'clamp(2rem, 5vw, 4rem)',
+                  boxShadow: '0 20px 60px rgba(0,0,0,0.08)',
                 }}
-              />
-
-              <div className="flex flex-col md:flex-row md:items-center gap-8 md:gap-16 relative z-10">
-                <div className="flex-shrink-0">
-                  <span
-                    className="font-heading font-black leading-none select-none"
-                    style={{
-                      fontSize: 'clamp(4rem, 10vw, 9rem)',
-                      fontFamily: "'Bricolage Grotesque', sans-serif",
-                      background: 'linear-gradient(135deg,#FF4D00,#FF2D55)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                      letterSpacing: '-0.04em',
-                    }}
-                  >
-                    {service.number}
-                  </span>
-                </div>
-
+              >
+                {/* Accent glow */}
                 <div
-                  className="hidden md:block flex-shrink-0"
+                  className="absolute top-0 left-0 w-64 h-64 rounded-full pointer-events-none"
                   style={{
-                    width: '1px',
-                    height: '120px',
-                    background: 'linear-gradient(to bottom,transparent,rgba(255,77,0,0.3),transparent)',
+                    background: 'radial-gradient(circle, rgba(255,77,0,0.05) 0%, transparent 70%)',
+                    transform: 'translate(-30%,-30%)',
                   }}
                 />
 
-                <div className="flex-1">
-                  <h3
-                    className="font-heading font-bold mb-4 leading-tight"
+                <div className="flex flex-col md:flex-row md:items-center gap-8 md:gap-16 relative z-10">
+
+                  {/* Number */}
+                  <div className="flex-shrink-0">
+                    <span
+                      className="font-heading font-black leading-none select-none"
+                      style={{
+                        fontSize: 'clamp(4rem, 10vw, 9rem)',
+                        fontFamily: "'Bricolage Grotesque', sans-serif",
+                        background: 'linear-gradient(135deg,#FF4D00,#FF2D55)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        letterSpacing: '-0.04em',
+                      }}
+                    >
+                      {service.number}
+                    </span>
+                  </div>
+
+                  {/* Vertical divider */}
+                  <div
+                    className="hidden md:block flex-shrink-0"
                     style={{
-                      fontSize: 'clamp(1.6rem,3.5vw,2.8rem)',
-                      fontFamily: "'Bricolage Grotesque', sans-serif",
-                      letterSpacing: '-0.02em',
-                      color: '#0a0a0a',
+                      width: '1px',
+                      height: '120px',
+                      background: 'linear-gradient(to bottom, transparent, rgba(255,77,0,0.3), transparent)',
                     }}
+                  />
+
+                  {/* Content */}
+                  <div className="flex-1">
+                    <h3
+                      className="font-heading font-bold mb-4 leading-tight"
+                      style={{
+                        fontSize: 'clamp(1.6rem,3.5vw,2.8rem)',
+                        fontFamily: "'Bricolage Grotesque', sans-serif",
+                        letterSpacing: '-0.02em',
+                        color: '#0a0a0a',
+                      }}
+                    >
+                      {service.title}
+                    </h3>
+                    <p
+                      className="font-body leading-relaxed mb-6"
+                      style={{
+                        fontSize: 'clamp(0.9rem,1.5vw,1.1rem)',
+                        color: 'rgba(0,0,0,0.5)',
+                        maxWidth: '540px',
+                      }}
+                    >
+                      {service.description}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {service.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="font-body text-xs px-3 py-1 rounded-full"
+                          style={{
+                            color: '#FF4D00',
+                            background: 'rgba(255,77,0,0.08)',
+                            border: '1px solid rgba(255,77,0,0.18)',
+                            letterSpacing: '0.05em',
+                          }}
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Progress dots */}
+                  <div
+                    className="hidden lg:flex flex-col items-center gap-2 flex-shrink-0"
+                    style={{ opacity: 0.2 }}
                   >
-                    {service.title}
-                  </h3>
-                  <p
-                    className="font-body leading-relaxed mb-6"
-                    style={{
-                      fontSize: 'clamp(0.9rem,1.5vw,1.1rem)',
-                      color: 'rgba(0,0,0,0.5)',
-                      maxWidth: '540px',
-                    }}
-                  >
-                    {service.description}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {service.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="font-body text-xs px-3 py-1 rounded-full"
+                    {SERVICES.map((_, idx) => (
+                      <div
+                        key={idx}
                         style={{
-                          color: '#FF4D00',
-                          background: 'rgba(255,77,0,0.08)',
-                          border: '1px solid rgba(255,77,0,0.18)',
-                          letterSpacing: '0.05em',
+                          width: idx === i ? '3px' : '2px',
+                          height: idx === i ? '28px' : '10px',
+                          borderRadius: '999px',
+                          background: idx === i ? '#FF4D00' : 'rgba(0,0,0,0.3)',
                         }}
-                      >
-                        {tag}
-                      </span>
+                      />
                     ))}
                   </div>
                 </div>
-
-                <div
-                  className="hidden lg:flex flex-col items-center gap-2 flex-shrink-0"
-                  style={{ opacity: 0.2 }}
-                >
-                  {SERVICES.map((_, idx) => (
-                    <div
-                      key={idx}
-                      style={{
-                        width: idx === i ? '3px' : '2px',
-                        height: idx === i ? '28px' : '10px',
-                        borderRadius: '999px',
-                        background: idx === i ? '#FF4D00' : 'rgba(0,0,0,0.3)',
-                      }}
-                    />
-                  ))}
-                </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
-      ))}
+      </div>
     </section>
   )
 }
