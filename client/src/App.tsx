@@ -19,6 +19,8 @@ const ProtectedRoute = lazy(() => import('@/components/admin/ProtectedRoute'))
 export default function App() {
   return (
     <BrowserRouter>
+      {/* Film grain noise overlay */}
+      <div className="noise-overlay" aria-hidden="true" />
       <CustomCursor />
       <Toaster
         position="bottom-right"

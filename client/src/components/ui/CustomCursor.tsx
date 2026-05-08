@@ -1,15 +1,25 @@
-import { useEffect, useState } from 'react'
-import { motion, useSpring } from 'framer-motion'
-import { useMousePosition } from '@/hooks/useMousePosition'
+import { useEffect, useRef, useState } from 'react'
+import { motion, useSpring, useMotionValue } from 'framer-motion'
+
+type CursorState = 'default' | 'hover' | 'click'
 
 export default function CustomCursor() {
   const [isTouch, setIsTouch] = useState(false)
-  const [isHovering, setIsHovering] = useState(false)
-  const { x, y } = useMousePosition()
+  const [state, setState] = useState<CursorState>('default')
 
-  const springConfig = { stiffness: 150, damping: 15, mass: 0.1 }
-  const ringX = useSpring(x, springConfig)
-  const ringY = useSpring(y, springConfig)
+  const mouseX = useMotionValue(-100)
+  const mouseY = useMotionValue(-100)
+
+  // Dot — very tight follower
+  const dotX = useSpring(mouseX, { stiffness: 600, damping: 32, mass: 0.4 })
+  const dotY = useSpring(mouseY, { stiffness: 600, damping: 32, mass: 0.4 })
+
+  // Ring — lags behind
+  const ringX = useSpring(mouseX, { stiffness: 160, damping: 22, mass: 0.6 })
+  const ringY = useSpring(mouseY, { stiffness: 160, damping: 22, mass: 0.6 })
+
+  const stateRef = useRef(state)
+  stateRef.current = state
 
   useEffect(() => {
     if (window.matchMedia('(pointer: coarse)').matches) {
@@ -17,76 +27,96 @@ export default function CustomCursor() {
       return
     }
 
-    const addHover = () => setIsHovering(true)
-    const removeHover = () => setIsHovering(false)
+    const onMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX)
+      mouseY.set(e.clientY)
+    }
 
-    const interactives = document.querySelectorAll('a, button, [data-cursor-hover]')
-    interactives.forEach((el) => {
-      el.addEventListener('mouseenter', addHover)
-      el.addEventListener('mouseleave', removeHover)
-    })
+    const onDown = () => setState('click')
+    const onUp   = () => setState(stateRef.current === 'click' ? 'default' : stateRef.current)
 
-    const observer = new MutationObserver(() => {
-      const els = document.querySelectorAll('a, button, [data-cursor-hover]')
-      els.forEach((el) => {
-        el.addEventListener('mouseenter', addHover)
-        el.addEventListener('mouseleave', removeHover)
-      })
-    })
-    observer.observe(document.body, { childList: true, subtree: true })
+    const onEnter = (e: MouseEvent) => {
+      const el = (e.target as Element).closest(
+        'a, button, [role="button"], input, textarea, select, label, [data-cursor="hover"]'
+      )
+      if (el) setState('hover')
+    }
+
+    const onLeave = (e: MouseEvent) => {
+      const el = (e.target as Element).closest(
+        'a, button, [role="button"], input, textarea, select, label, [data-cursor="hover"]'
+      )
+      if (el) setState('default')
+    }
+
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mousedown', onDown)
+    window.addEventListener('mouseup', onUp)
+    document.addEventListener('mouseover', onEnter)
+    document.addEventListener('mouseout', onLeave)
 
     return () => {
-      interactives.forEach((el) => {
-        el.removeEventListener('mouseenter', addHover)
-        el.removeEventListener('mouseleave', removeHover)
-      })
-      observer.disconnect()
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mousedown', onDown)
+      window.removeEventListener('mouseup', onUp)
+      document.removeEventListener('mouseover', onEnter)
+      document.removeEventListener('mouseout', onLeave)
     }
-  }, [])
+  }, [mouseX, mouseY])
 
   if (isTouch) return null
+
+  const dotSize   = state === 'hover' ? 0  : state === 'click' ? 4  : 7
+  const ringSize  = state === 'hover' ? 52 : state === 'click' ? 22 : 36
+  const ringBorder = state === 'hover'
+    ? '2px solid #FF4D00'
+    : state === 'click'
+    ? '2px solid #06b6d4'
+    : '1.5px solid rgba(240,240,255,0.4)'
+  const ringBg = state === 'hover' ? 'rgba(255,77,0,0.06)' : 'transparent'
 
   return (
     <>
       {/* Dot */}
       <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[9999]"
+        className="fixed top-0 left-0 pointer-events-none z-[9999] rounded-full bg-white"
         style={{
-          x,
-          y,
-          translateX: '-50%',
-          translateY: '-50%',
-          width: 8,
-          height: 8,
-          borderRadius: '50%',
-          backgroundColor: '#FF4D00',
+          x: dotX, y: dotY,
+          translateX: '-50%', translateY: '-50%',
+          width: dotSize, height: dotSize,
         }}
+        transition={{ duration: 0.15 }}
       />
+
       {/* Ring */}
       <motion.div
-        className="fixed top-0 left-0 pointer-events-none z-[9998]"
+        className="fixed top-0 left-0 pointer-events-none z-[9998] rounded-full"
         style={{
-          x: ringX,
-          y: ringY,
-          translateX: '-50%',
-          translateY: '-50%',
+          x: ringX, y: ringY,
+          translateX: '-50%', translateY: '-50%',
+          width: ringSize, height: ringSize,
+          border: ringBorder,
+          background: ringBg,
         }}
-        animate={{
-          width: isHovering ? 60 : 40,
-          height: isHovering ? 60 : 40,
-          opacity: isHovering ? 0.8 : 0.5,
-        }}
-        transition={{ duration: 0.2 }}
-      >
-        <div
-          className="w-full h-full rounded-full border-2"
+        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      />
+
+      {/* Glow layer — only on hover */}
+      {state === 'hover' && (
+        <motion.div
+          className="fixed top-0 left-0 pointer-events-none z-[9997] rounded-full"
           style={{
-            borderColor: isHovering ? '#FF4D00' : 'rgba(255,255,255,0.5)',
-            boxShadow: isHovering ? '0 0 12px rgba(255,77,0,0.6)' : 'none',
-            transition: 'border-color 0.2s, box-shadow 0.2s',
+            x: ringX, y: ringY,
+            translateX: '-50%', translateY: '-50%',
+            width: 80, height: 80,
+            background: 'radial-gradient(circle, rgba(255,77,0,0.18) 0%, transparent 70%)',
+            filter: 'blur(4px)',
           }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         />
-      </motion.div>
+      )}
     </>
   )
 }
