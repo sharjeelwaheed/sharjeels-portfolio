@@ -22,8 +22,7 @@ interface Project {
 export default function ProjectsSection() {
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
-  const containerRef = useRef<HTMLDivElement>(null)
-  const cardsRef = useRef<HTMLDivElement[]>([])
+  const cardInnerRefs = useRef<HTMLDivElement[]>([])
 
   useEffect(() => {
     api.get('/projects')
@@ -34,102 +33,78 @@ export default function ProjectsSection() {
   useEffect(() => {
     if (loading || projects.length === 0) return
 
-    // small delay so DOM is fully painted
     const timer = setTimeout(() => {
       const ctx = gsap.context(() => {
-        const cards = cardsRef.current.filter(Boolean)
-        const total = cards.length
+        const cards = cardInnerRefs.current.filter(Boolean)
 
-        cards.forEach((card, i) => {
-          const isLast = i === total - 1
+        cards.forEach((inner, i) => {
+          if (i === cards.length - 1) return
 
-          ScrollTrigger.create({
-            trigger: card,
-            start: 'top top',
-            end: isLast ? 'bottom top' : `+=${window.innerHeight * 1.3}`,
-            pin: true,
-            pinSpacing: false,
-            scrub: true,
+          // Scale + dim as the next card scrolls over
+          gsap.to(inner, {
+            scale: 0.93,
+            opacity: 0.4,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: inner,
+              start: 'top top',
+              end: 'bottom top',
+              scrub: 1,
+            },
           })
-
-          if (!isLast) {
-            gsap.to(card, {
-              scale: 0.93,
-              opacity: 0.5,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: cards[i + 1],
-                start: 'top 75%',
-                end: 'top top',
-                scrub: 1,
-              },
-            })
-          }
-
-          if (i > 0) {
-            gsap.fromTo(
-              card,
-              { yPercent: 5, opacity: 0 },
-              {
-                yPercent: 0,
-                opacity: 1,
-                ease: 'power2.out',
-                scrollTrigger: {
-                  trigger: card,
-                  start: 'top 90%',
-                  end: 'top top',
-                  scrub: 1,
-                },
-              }
-            )
-          }
         })
 
         ScrollTrigger.refresh()
-      }, containerRef)
+      })
 
       return () => ctx.revert()
-    }, 120)
+    }, 100)
 
     return () => clearTimeout(timer)
   }, [loading, projects])
 
   return (
-    <section id="projects" ref={containerRef} style={{ background: '#0e0e0e' }}>
+    <section id="projects" style={{ background: '#0e0e0e' }}>
       {/* Heading */}
       <div
         className="flex flex-col items-center justify-center"
-        style={{ height: '35vh', paddingTop: '6rem' }}
+        style={{ height: '40vh', paddingTop: '5rem' }}
       >
         <SectionHeading label="My Work" title="Selected Projects" align="center" />
       </div>
 
-      {/* Stacked project cards */}
       {loading ? (
         <div className="flex items-center justify-center" style={{ height: '60vh' }}>
-          <div className="w-10 h-10 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: '#FF4D00', borderTopColor: 'transparent' }} />
+          <div
+            className="w-10 h-10 rounded-full border-2 animate-spin"
+            style={{ borderColor: '#FF4D00', borderTopColor: 'transparent' }}
+          />
         </div>
       ) : (
-        <div style={{ paddingBottom: `${projects.length * 60}px` }}>
-          {projects.map((project, i) => (
+        /* Each wrapper is 100vh — CSS sticky stacks the cards */
+        projects.map((project, i) => (
+          <div key={project._id} style={{ height: '100vh' }}>
             <div
-              key={project._id}
-              ref={(el) => { if (el) cardsRef.current[i] = el }}
+              ref={(el) => { if (el) cardInnerRefs.current[i] = el }}
               className="w-full flex items-center justify-center"
-              style={{ height: '100vh', top: 0, zIndex: 10 + i, padding: '0 1.5rem' }}
+              style={{
+                position: 'sticky',
+                top: 0,
+                height: '100vh',
+                zIndex: 10 + i,
+                padding: '0 1.5rem',
+              }}
             >
               <div
-                className="w-full max-w-6xl rounded-3xl overflow-hidden relative"
+                className="w-full max-w-6xl rounded-3xl overflow-hidden relative flex"
                 style={{
-                  background: 'linear-gradient(135deg, #111111 0%, #181818 100%)',
+                  background: 'linear-gradient(135deg,#111111 0%,#181818 100%)',
                   border: '1px solid rgba(255,255,255,0.07)',
                   boxShadow: '0 40px 80px rgba(0,0,0,0.6)',
                   height: 'min(78vh, 560px)',
-                  display: 'flex',
-                  flexDirection: 'row',
                 }}
               >
-                {/* Image side */}
+                {/* Image */}
                 <div
                   className="relative overflow-hidden flex-shrink-0"
                   style={{ width: '55%', height: '100%' }}
@@ -139,52 +114,59 @@ export default function ProjectsSection() {
                       src={project.imageUrl}
                       alt={project.title}
                       className="w-full h-full object-cover"
-                      style={{ transition: 'transform 0.6s ease' }}
                     />
                   ) : (
                     <div
                       className="w-full h-full flex items-center justify-center"
-                      style={{ background: 'linear-gradient(135deg, #1a0800, #2d1000)' }}
+                      style={{ background: 'linear-gradient(135deg,#1a0800,#2d1000)' }}
                     >
                       <span
-                        className="font-heading font-black text-8xl opacity-10"
-                        style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                        className="font-heading font-black text-8xl"
+                        style={{
+                          fontFamily: "'Bricolage Grotesque', sans-serif",
+                          background: 'linear-gradient(135deg,#FF4D00,#FF2D55)',
+                          WebkitBackgroundClip: 'text',
+                          WebkitTextFillColor: 'transparent',
+                          opacity: 0.2,
+                        }}
                       >
                         {project.title[0]}
                       </span>
                     </div>
                   )}
-                  {/* Gradient overlay on image */}
+                  {/* Fade image into card */}
                   <div
                     className="absolute inset-0"
-                    style={{ background: 'linear-gradient(to right, transparent 60%, #111111 100%)' }}
+                    style={{ background: 'linear-gradient(to right,transparent 50%,#141414 100%)' }}
                   />
                   {project.featured && (
                     <div
                       className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-body"
-                      style={{ background: 'rgba(255,77,0,0.15)', border: '1px solid rgba(255,77,0,0.3)', color: '#FF4D00' }}
+                      style={{
+                        background: 'rgba(255,77,0,0.15)',
+                        border: '1px solid rgba(255,77,0,0.3)',
+                        color: '#FF4D00',
+                      }}
                     >
                       Featured
                     </div>
                   )}
                 </div>
 
-                {/* Content side */}
+                {/* Content */}
                 <div
                   className="flex flex-col justify-center flex-1 relative z-10"
-                  style={{ padding: 'clamp(1.5rem, 3vw, 3rem)', paddingLeft: 'clamp(1rem, 2vw, 2rem)' }}
+                  style={{ padding: 'clamp(1.5rem,3vw,3rem)', paddingLeft: 'clamp(1rem,2vw,1.5rem)' }}
                 >
-                  {/* Project number */}
                   <span
                     className="font-heading font-black leading-none mb-4 select-none block"
                     style={{
-                      fontSize: 'clamp(3rem, 6vw, 5.5rem)',
+                      fontSize: 'clamp(3rem,6vw,5.5rem)',
                       fontFamily: "'Bricolage Grotesque', sans-serif",
-                      background: 'linear-gradient(135deg, #FF4D00 0%, #FF2D55 100%)',
+                      background: 'linear-gradient(135deg,#FF4D00,#FF2D55)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       letterSpacing: '-0.04em',
-                      opacity: 0.85,
                     }}
                   >
                     {String(i + 1).padStart(2, '0')}
@@ -193,7 +175,7 @@ export default function ProjectsSection() {
                   <h3
                     className="font-heading font-bold text-white leading-tight mb-3"
                     style={{
-                      fontSize: 'clamp(1.4rem, 2.5vw, 2.2rem)',
+                      fontSize: 'clamp(1.4rem,2.5vw,2.2rem)',
                       fontFamily: "'Bricolage Grotesque', sans-serif",
                       letterSpacing: '-0.02em',
                     }}
@@ -204,7 +186,7 @@ export default function ProjectsSection() {
                   <p
                     className="font-body leading-relaxed mb-5"
                     style={{
-                      fontSize: 'clamp(0.82rem, 1.2vw, 0.95rem)',
+                      fontSize: 'clamp(0.82rem,1.2vw,0.95rem)',
                       color: 'rgba(255,255,255,0.4)',
                       maxWidth: '380px',
                     }}
@@ -212,7 +194,6 @@ export default function ProjectsSection() {
                     {project.description}
                   </p>
 
-                  {/* Tech tags */}
                   <div className="flex flex-wrap gap-1.5 mb-6">
                     {project.techStack.slice(0, 4).map((tech) => (
                       <span
@@ -229,7 +210,6 @@ export default function ProjectsSection() {
                     ))}
                   </div>
 
-                  {/* Links */}
                   <div className="flex gap-3">
                     {project.liveUrl && (
                       <a
@@ -237,7 +217,7 @@ export default function ProjectsSection() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-body text-white"
-                        style={{ background: 'linear-gradient(135deg, #FF4D00, #FF2D55)' }}
+                        style={{ background: 'linear-gradient(135deg,#FF4D00,#FF2D55)' }}
                       >
                         Live <ArrowUpRight size={14} />
                       </a>
@@ -248,7 +228,10 @@ export default function ProjectsSection() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-body text-white/70 hover:text-white"
-                        style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
+                        style={{
+                          background: 'rgba(255,255,255,0.08)',
+                          border: '1px solid rgba(255,255,255,0.1)',
+                        }}
                       >
                         <GithubIcon size={14} /> Code
                       </a>
@@ -257,8 +240,8 @@ export default function ProjectsSection() {
                 </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))
       )}
     </section>
   )

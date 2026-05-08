@@ -41,69 +41,38 @@ const SERVICES = [
 ]
 
 export default function ServicesSection() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const cardsRef = useRef<HTMLDivElement[]>([])
+  const cardInnerRefs = useRef<HTMLDivElement[]>([])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const cards = cardsRef.current.filter(Boolean)
-      const total = cards.length
+      cardInnerRefs.current.filter(Boolean).forEach((inner, i) => {
+        const total = cardInnerRefs.current.length
+        if (i === total - 1) return
 
-      cards.forEach((card, i) => {
-        const isLast = i === total - 1
-
-        ScrollTrigger.create({
-          trigger: card,
-          start: 'top top',
-          end: isLast ? 'bottom top' : `+=${window.innerHeight * 1.2}`,
-          pin: true,
-          pinSpacing: false,
-          scrub: true,
+        // Scale + dim current card as the next one scrolls over it
+        gsap.to(inner, {
+          scale: 0.93,
+          opacity: 0.45,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: inner,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 1,
+          },
         })
-
-        if (!isLast) {
-          gsap.to(card, {
-            scale: 0.94,
-            opacity: 0.5,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: cards[i + 1],
-              start: 'top 75%',
-              end: 'top top',
-              scrub: 1,
-            },
-          })
-        }
-
-        if (i > 0) {
-          gsap.fromTo(
-            card,
-            { yPercent: 6, opacity: 0 },
-            {
-              yPercent: 0,
-              opacity: 1,
-              ease: 'power2.out',
-              scrollTrigger: {
-                trigger: card,
-                start: 'top 90%',
-                end: 'top top',
-                scrub: 1,
-              },
-            }
-          )
-        }
       })
-    }, containerRef)
+    })
 
     return () => ctx.revert()
   }, [])
 
   return (
-    <section id="services" ref={containerRef} style={{ background: '#ffffff' }}>
-      {/* Section heading */}
+    <section id="services" style={{ background: '#ffffff' }}>
+      {/* Heading */}
       <div
         className="flex flex-col items-center justify-center"
-        style={{ height: '35vh', paddingTop: '6rem' }}
+        style={{ height: '40vh', paddingTop: '5rem' }}
       >
         <span
           className="text-xs font-body tracking-widest uppercase mb-4"
@@ -124,42 +93,45 @@ export default function ServicesSection() {
         </h2>
       </div>
 
-      {/* Cards */}
-      <div style={{ paddingBottom: `${SERVICES.length * 60}px` }}>
-        {SERVICES.map((service, i) => (
+      {/* Each card wrapper is 100vh — CSS sticky does the stacking */}
+      {SERVICES.map((service, i) => (
+        <div key={service.number} style={{ height: '100vh' }}>
           <div
-            key={service.number}
-            ref={(el) => { if (el) cardsRef.current[i] = el }}
+            ref={(el) => { if (el) cardInnerRefs.current[i] = el }}
             className="w-full flex items-center justify-center"
-            style={{ height: '100vh', top: 0, zIndex: 10 + i, padding: '0 1.5rem' }}
+            style={{
+              position: 'sticky',
+              top: 0,
+              height: '100vh',
+              zIndex: 10 + i,
+              padding: '0 1.5rem',
+            }}
           >
             <div
               className="w-full max-w-5xl rounded-3xl relative overflow-hidden"
               style={{
-                background: i % 2 === 0 ? '#f7f7f7' : '#f0f0f0',
+                background: i % 2 === 0 ? '#f7f7f7' : '#efefef',
                 border: '1px solid rgba(0,0,0,0.07)',
                 padding: 'clamp(2rem, 5vw, 4rem)',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.08)',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.07)',
               }}
             >
-              {/* Subtle accent glow */}
               <div
                 className="absolute top-0 left-0 w-64 h-64 rounded-full pointer-events-none"
                 style={{
                   background: 'radial-gradient(circle, rgba(255,77,0,0.05) 0%, transparent 70%)',
-                  transform: 'translate(-30%, -30%)',
+                  transform: 'translate(-30%,-30%)',
                 }}
               />
 
               <div className="flex flex-col md:flex-row md:items-center gap-8 md:gap-16 relative z-10">
-                {/* Number */}
                 <div className="flex-shrink-0">
                   <span
                     className="font-heading font-black leading-none select-none"
                     style={{
                       fontSize: 'clamp(4rem, 10vw, 9rem)',
                       fontFamily: "'Bricolage Grotesque', sans-serif",
-                      background: 'linear-gradient(135deg, #FF4D00 0%, #FF2D55 100%)',
+                      background: 'linear-gradient(135deg,#FF4D00,#FF2D55)',
                       WebkitBackgroundClip: 'text',
                       WebkitTextFillColor: 'transparent',
                       letterSpacing: '-0.04em',
@@ -169,22 +141,20 @@ export default function ServicesSection() {
                   </span>
                 </div>
 
-                {/* Divider */}
                 <div
                   className="hidden md:block flex-shrink-0"
                   style={{
                     width: '1px',
                     height: '120px',
-                    background: 'linear-gradient(to bottom, transparent, rgba(255,77,0,0.3), transparent)',
+                    background: 'linear-gradient(to bottom,transparent,rgba(255,77,0,0.3),transparent)',
                   }}
                 />
 
-                {/* Content */}
                 <div className="flex-1">
                   <h3
                     className="font-heading font-bold mb-4 leading-tight"
                     style={{
-                      fontSize: 'clamp(1.6rem, 3.5vw, 2.8rem)',
+                      fontSize: 'clamp(1.6rem,3.5vw,2.8rem)',
                       fontFamily: "'Bricolage Grotesque', sans-serif",
                       letterSpacing: '-0.02em',
                       color: '#0a0a0a',
@@ -195,7 +165,7 @@ export default function ServicesSection() {
                   <p
                     className="font-body leading-relaxed mb-6"
                     style={{
-                      fontSize: 'clamp(0.9rem, 1.5vw, 1.1rem)',
+                      fontSize: 'clamp(0.9rem,1.5vw,1.1rem)',
                       color: 'rgba(0,0,0,0.5)',
                       maxWidth: '540px',
                     }}
@@ -220,10 +190,9 @@ export default function ServicesSection() {
                   </div>
                 </div>
 
-                {/* Progress indicators */}
                 <div
                   className="hidden lg:flex flex-col items-center gap-2 flex-shrink-0"
-                  style={{ opacity: 0.25 }}
+                  style={{ opacity: 0.2 }}
                 >
                   {SERVICES.map((_, idx) => (
                     <div
@@ -240,8 +209,8 @@ export default function ServicesSection() {
               </div>
             </div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </section>
   )
 }
