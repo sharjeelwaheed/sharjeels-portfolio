@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { ArrowUpRight } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { GithubIcon } from '@/components/ui/SocialIcons'
 import SectionHeading from '@/components/ui/SectionHeading'
 import { TECH_COLORS } from '@/utils/constants'
@@ -212,15 +212,27 @@ export default function ProjectsSection() {
 
                   <div className="flex gap-3">
                     {project.liveUrl && (
-                      <a
+                      <motion.a
                         href={project.liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-body text-white"
-                        style={{ background: 'linear-gradient(135deg,#FF4D00,#FF2D55)' }}
+                        className="flex items-center gap-2 font-body font-semibold text-white"
+                        style={{
+                          background: '#0a0a0a',
+                          borderRadius: 999,
+                          padding: '0.6rem 1.4rem',
+                          fontSize: '0.8rem',
+                          letterSpacing: '0.08em',
+                          textTransform: 'uppercase',
+                        }}
+                        initial={{ opacity: 0, y: 8 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        whileHover={{ scale: 1.04 }}
+                        whileTap={{ scale: 0.97 }}
+                        transition={{ duration: 0.2 }}
                       >
-                        Live <ArrowUpRight size={14} />
-                      </a>
+                        Checkout <span style={{ fontSize: '1rem' }}>↗</span>
+                      </motion.a>
                     )}
                     {project.githubUrl && (
                       <a

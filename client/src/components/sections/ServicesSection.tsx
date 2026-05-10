@@ -1,261 +1,235 @@
-import { useEffect, useRef } from 'react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useState, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const SERVICES = [
   {
     number: '01',
     title: 'Full Stack Development',
-    description:
-      'End-to-end web applications built with React, Node.js, and MongoDB. From polished frontends to robust REST APIs — production-ready and scalable.',
-    tags: ['React', 'Node.js', 'MongoDB', 'REST API'],
+    tags: ['React', 'Node.js', 'MongoDB'],
+    thumb: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=500&q=80',
   },
   {
     number: '02',
     title: 'UI / UX Design',
-    description:
-      'Clean, purposeful interfaces crafted in Figma and brought to life with Framer Motion. Every interaction is intentional, every pixel earns its place.',
-    tags: ['Figma', 'Framer Motion', 'Tailwind CSS', 'Responsive'],
+    tags: ['Figma', 'Framer Motion', 'Tailwind'],
+    thumb: 'https://sharjeels-portfolio-7irb.vercel.app/images/uiux-cover.jpeg',
   },
   {
     number: '03',
     title: 'AI Integration',
-    description:
-      'Embedding real intelligence into products — LLM-powered features, voice interfaces, smart routing, and multi-modal AI pipelines using Groq, OpenAI, and more.',
-    tags: ['Groq', 'OpenAI', 'LLM', 'Voice AI'],
+    tags: ['Groq', 'OpenAI', 'LLM'],
+    thumb: 'https://sharjeels-portfolio-7irb.vercel.app/images/haqooqi-cover.png',
   },
   {
     number: '04',
     title: 'Backend & API Engineering',
-    description:
-      'Secure, well-structured backend systems with JWT auth, role-based access, database design, and cloud deployment on Vercel, Firebase, or custom servers.',
-    tags: ['Express.js', 'JWT', 'Supabase', 'Firebase'],
+    tags: ['Express.js', 'JWT', 'Supabase'],
+    thumb: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500&q=80',
   },
   {
     number: '05',
     title: 'Performance & Optimization',
-    description:
-      'Auditing and rebuilding slow apps — code splitting, lazy loading, caching strategies, and image pipelines that make sites feel instant.',
-    tags: ['Vite', 'Lighthouse', 'CDN', 'Web Vitals'],
+    tags: ['Vite', 'Lighthouse', 'Web Vitals'],
+    thumb: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&q=80',
   },
 ]
 
 export default function ServicesSection() {
-  // sectionRef = the tall scrollable area that drives the animation
+  const [hovered, setHovered] = useState<number | null>(null)
   const sectionRef = useRef<HTMLDivElement>(null)
-  // cardsRef = the absolutely-positioned card layers inside the sticky viewport
-  const cardsRef = useRef<HTMLDivElement[]>([])
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      const cards = cardsRef.current.filter(Boolean)
-      const vh = window.innerHeight
-
-      cards.forEach((card, i) => {
-        if (i === 0) return
-
-        // Pixel offset into the section where this card starts sliding in
-        const scrollStart = (i - 1) * vh
-        const scrollEnd   = scrollStart + vh * 0.65 // card fully arrives after 65vh of scroll
-
-        // ── Incoming card slides up from below (scrubbed) ──
-        gsap.fromTo(
-          card,
-          { yPercent: 100 },
-          {
-            yPercent: 0,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: `top+=${scrollStart}px top`,
-              end:   `top+=${scrollEnd}px top`,
-              scrub: 1.5,   // ← adjust for faster (lower) / smoother (higher) feel
-            },
-          }
-        )
-
-        // ── Previous card scales down + dims as new one arrives ──
-        gsap.to(cards[i - 1], {
-          scale:   0.92,
-          opacity: 0.45,
-          ease:    'none',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: `top+=${scrollStart}px top`,
-            end:   `top+=${scrollEnd}px top`,
-            scrub: 1.5,
-          },
-        })
-      })
-    })
-
-    return () => ctx.revert()
-  }, [])
 
   return (
-    <section id="services" style={{ background: '#ffffff' }}>
+    <section id="services" ref={sectionRef} style={{ background: '#ffffff', padding: 'clamp(5rem,10vw,8rem) 0' }}>
+      <div className="max-w-7xl mx-auto px-6">
 
-      {/* ── Section heading — scrolls normally before sticky kicks in ── */}
-      <div
-        className="flex flex-col items-center justify-center"
-        style={{ height: '40vh', paddingTop: '5rem' }}
-      >
-        <span
-          className="text-xs font-body tracking-widest uppercase mb-4"
-          style={{ color: '#FF4D00', letterSpacing: '0.2em' }}
-        >
-          What I Do
-        </span>
-        <h2
-          className="font-heading font-black text-center leading-none"
-          style={{
-            fontSize: 'clamp(3rem, 8vw, 7rem)',
-            color: '#0a0a0a',
-            fontFamily: "'Bricolage Grotesque', sans-serif",
-            letterSpacing: '-0.03em',
-          }}
-        >
-          SERVICES
-        </h2>
-      </div>
+        {/* Heading */}
+        <div className="mb-16">
+          <span
+            className="text-xs font-body tracking-widest uppercase mb-4 block"
+            style={{ color: '#FF4D00', letterSpacing: '0.2em' }}
+          >
+            What I Do
+          </span>
+          <h2
+            className="font-heading font-black leading-none"
+            style={{
+              fontFamily: "'Bricolage Grotesque', sans-serif",
+              fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
+              color: '#0a0a0a',
+              letterSpacing: '-0.03em',
+            }}
+          >
+            SERVICES
+          </h2>
+        </div>
 
-      {/* ── Scrollable driver — height = N cards × 100vh ── */}
-      {/* This div provides the scroll distance; the sticky inner pins at top:0 */}
-      <div
-        ref={sectionRef}
-        style={{ height: `${SERVICES.length * 100}vh`, position: 'relative' }}
-      >
-        {/* ── Single sticky viewport — cards stack inside here ── */}
-        <div
-          style={{
-            position: 'sticky',
-            top: 0,
-            height: '100vh',
-            overflow: 'hidden',
-          }}
-        >
-          {SERVICES.map((service, i) => (
-            <div
-              key={service.number}
-              ref={(el) => { if (el) cardsRef.current[i] = el }}
-              style={{
-                position: 'absolute',
-                inset: 0,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '0 1.5rem',
-              }}
-            >
-              <div
-                className="w-full max-w-5xl rounded-3xl relative overflow-hidden"
-                style={{
-                  background: i % 2 === 0 ? '#f7f7f7' : '#efefef',
-                  border: '1px solid rgba(0,0,0,0.07)',
-                  padding: 'clamp(2rem, 5vw, 4rem)',
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.08)',
-                }}
+        {/* Two-col layout: list left, thumbnail right */}
+        <div className="relative flex gap-16 items-start">
+
+          {/* Service list */}
+          <div className="flex-1">
+            {SERVICES.map((service, i) => (
+              <motion.div
+                key={service.number}
+                onHoverStart={() => setHovered(i)}
+                onHoverEnd={() => setHovered(null)}
+                className="group relative cursor-default"
+                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}
               >
-                {/* Accent glow */}
-                <div
-                  className="absolute top-0 left-0 w-64 h-64 rounded-full pointer-events-none"
-                  style={{
-                    background: 'radial-gradient(circle, rgba(255,77,0,0.05) 0%, transparent 70%)',
-                    transform: 'translate(-30%,-30%)',
-                  }}
+                {/* Hover fill bg */}
+                <motion.div
+                  className="absolute inset-0 pointer-events-none"
+                  initial={false}
+                  animate={{ opacity: hovered === i ? 1 : 0 }}
+                  transition={{ duration: 0.25 }}
+                  style={{ background: 'rgba(255,77,0,0.03)' }}
                 />
 
-                <div className="flex flex-col md:flex-row md:items-center gap-8 md:gap-16 relative z-10">
-
+                <div className="relative flex items-center gap-6 py-7 px-2">
                   {/* Number */}
-                  <div className="flex-shrink-0">
-                    <span
-                      className="font-heading font-black leading-none select-none"
-                      style={{
-                        fontSize: 'clamp(4rem, 10vw, 9rem)',
-                        fontFamily: "'Bricolage Grotesque', sans-serif",
-                        background: 'linear-gradient(135deg,#FF4D00,#FF2D55)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        letterSpacing: '-0.04em',
-                      }}
-                    >
-                      {service.number}
-                    </span>
-                  </div>
-
-                  {/* Vertical divider */}
-                  <div
-                    className="hidden md:block flex-shrink-0"
+                  <span
+                    className="font-body tabular-nums flex-shrink-0 transition-colors duration-300"
                     style={{
-                      width: '1px',
-                      height: '120px',
-                      background: 'linear-gradient(to bottom, transparent, rgba(255,77,0,0.3), transparent)',
+                      fontSize: '0.75rem',
+                      letterSpacing: '0.1em',
+                      color: hovered === i ? '#FF4D00' : 'rgba(0,0,0,0.25)',
                     }}
-                  />
-
-                  {/* Content */}
-                  <div className="flex-1">
-                    <h3
-                      className="font-heading font-bold mb-4 leading-tight"
-                      style={{
-                        fontSize: 'clamp(1.6rem,3.5vw,2.8rem)',
-                        fontFamily: "'Bricolage Grotesque', sans-serif",
-                        letterSpacing: '-0.02em',
-                        color: '#0a0a0a',
-                      }}
-                    >
-                      {service.title}
-                    </h3>
-                    <p
-                      className="font-body leading-relaxed mb-6"
-                      style={{
-                        fontSize: 'clamp(0.9rem,1.5vw,1.1rem)',
-                        color: 'rgba(0,0,0,0.5)',
-                        maxWidth: '540px',
-                      }}
-                    >
-                      {service.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {service.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="font-body text-xs px-3 py-1 rounded-full"
-                          style={{
-                            color: '#FF4D00',
-                            background: 'rgba(255,77,0,0.08)',
-                            border: '1px solid rgba(255,77,0,0.18)',
-                            letterSpacing: '0.05em',
-                          }}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Progress dots */}
-                  <div
-                    className="hidden lg:flex flex-col items-center gap-2 flex-shrink-0"
-                    style={{ opacity: 0.2 }}
                   >
-                    {SERVICES.map((_, idx) => (
-                      <div
-                        key={idx}
+                    {service.number}
+                  </span>
+
+                  {/* Title */}
+                  <motion.h3
+                    className="font-heading font-black leading-none flex-1 transition-colors duration-300"
+                    style={{
+                      fontFamily: "'Bricolage Grotesque', sans-serif",
+                      fontSize: 'clamp(1.8rem, 4vw, 3.5rem)',
+                      letterSpacing: '-0.02em',
+                      color: hovered === i ? '#FF4D00' : '#0a0a0a',
+                    }}
+                  >
+                    {service.title}
+                  </motion.h3>
+
+                  {/* Tags — slide in on hover */}
+                  <motion.div
+                    className="hidden md:flex gap-2 flex-shrink-0"
+                    initial={false}
+                    animate={{ opacity: hovered === i ? 1 : 0, x: hovered === i ? 0 : 12 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    {service.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="font-body text-xs px-3 py-1 rounded-full"
                         style={{
-                          width: idx === i ? '3px' : '2px',
-                          height: idx === i ? '28px' : '10px',
-                          borderRadius: '999px',
-                          background: idx === i ? '#FF4D00' : 'rgba(0,0,0,0.3)',
+                          color: '#FF4D00',
+                          background: 'rgba(255,77,0,0.08)',
+                          border: '1px solid rgba(255,77,0,0.18)',
+                          letterSpacing: '0.05em',
                         }}
-                      />
+                      >
+                        {tag}
+                      </span>
                     ))}
-                  </div>
+                  </motion.div>
+
+                  {/* Arrow */}
+                  <motion.span
+                    className="flex-shrink-0 text-2xl font-heading font-black leading-none"
+                    style={{ fontFamily: "'Bricolage Grotesque', sans-serif", color: '#FF4D00' }}
+                    initial={false}
+                    animate={{
+                      opacity: hovered === i ? 1 : 0,
+                      rotate: hovered === i ? 0 : -45,
+                    }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    ↗
+                  </motion.span>
                 </div>
-              </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Sticky thumbnail panel */}
+          <div
+            className="hidden lg:block flex-shrink-0"
+            style={{ width: 280, position: 'sticky', top: '20vh' }}
+          >
+            <div style={{ position: 'relative', width: 280, height: 340 }}>
+              <AnimatePresence mode="wait">
+                {hovered !== null && (
+                  <motion.div
+                    key={hovered}
+                    initial={{ opacity: 0, y: 24, rotate: -4, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, rotate: -2, scale: 1 }}
+                    exit={{ opacity: 0, y: -16, rotate: 2, scale: 0.96 }}
+                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      borderRadius: 20,
+                      overflow: 'hidden',
+                      boxShadow: '0 30px 60px rgba(0,0,0,0.18)',
+                    }}
+                  >
+                    <img
+                      src={SERVICES[hovered].thumb}
+                      alt={SERVICES[hovered].title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    />
+                    {/* Overlay with service name */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        padding: '1.5rem',
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
+                      }}
+                    >
+                      <p
+                        className="text-white font-heading font-bold text-sm"
+                        style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                      >
+                        {SERVICES[hovered].title}
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Placeholder when nothing hovered */}
+              <AnimatePresence>
+                {hovered === null && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      borderRadius: 20,
+                      border: '2px dashed rgba(0,0,0,0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <span
+                      className="font-body text-sm"
+                      style={{ color: 'rgba(0,0,0,0.2)', letterSpacing: '0.05em' }}
+                    >
+                      hover a service
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-          ))}
+          </div>
         </div>
       </div>
     </section>
