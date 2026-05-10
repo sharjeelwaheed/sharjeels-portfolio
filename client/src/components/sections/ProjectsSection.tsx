@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, useScroll, useMotionValue, useMotionValueEvent, useSpring } from 'framer-motion'
+import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion'
 import { GithubIcon } from '@/components/ui/SocialIcons'
 import api from '@/utils/api'
 
@@ -31,11 +31,16 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
 
   return (
     <div
-      style={{ width: '100vw', height: '100vh', flexShrink: 0, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 2rem' }}
+      style={{
+        width: '100vw', height: '100vh', flexShrink: 0,
+        position: 'relative', display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        padding: '0 2rem',
+      }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Atmospheric glow behind card */}
+      {/* Atmospheric glow */}
       <div className="absolute inset-0 pointer-events-none" style={{
         background: `radial-gradient(ellipse 70% 60% at 50% 48%, ${glow} 0%, transparent 70%)`,
         opacity: active ? 1 : 0,
@@ -44,12 +49,12 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
 
       {/* Card */}
       <motion.div
-        animate={{ scale: active ? 1 : 0.95, opacity: active ? 1 : 0.5 }}
-        transition={{ duration: 0.65, ease: EASE }}
+        animate={{ scale: active ? 1 : 0.95, opacity: active ? 1 : 0.45 }}
+        transition={{ duration: 0.6, ease: EASE }}
         className="relative overflow-hidden w-full"
         style={{
           maxWidth: 1060,
-          height: 'min(76vh, 580px)',
+          height: 'min(74vh, 560px)',
           borderRadius: 20,
           background: '#0f0f0f',
           border: '1px solid rgba(255,255,255,0.06)',
@@ -87,11 +92,10 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
               }}>{project.title[0]}</span>
             </div>
           )}
-          {/* Fade image into card */}
+          {/* Fade into card */}
           <div className="absolute inset-0 pointer-events-none" style={{
             background: 'linear-gradient(to right, transparent 55%, #0f0f0f 100%)',
           }} />
-          {/* Featured badge */}
           {project.featured && (
             <div className="absolute top-4 left-4 font-body text-xs px-3 py-1 rounded-full" style={{
               background: 'rgba(255,77,0,0.15)',
@@ -111,14 +115,11 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
           <span style={{
             fontFamily: "'Bricolage Grotesque',sans-serif",
             fontSize: 'clamp(3rem,7vw,6rem)',
-            fontWeight: 900,
-            letterSpacing: '-0.05em',
-            lineHeight: 1,
+            fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1,
             background: 'linear-gradient(135deg,#FF4D00,#FF2D55)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             marginBottom: '0.5rem', display: 'block',
-            opacity: active ? 1 : 0.3,
-            transition: 'opacity 0.5s ease',
+            opacity: active ? 1 : 0.3, transition: 'opacity 0.5s ease',
           }}>
             {String(index + 1).padStart(2, '0')}
           </span>
@@ -128,10 +129,7 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
             <h3 style={{
               fontFamily: "'Bricolage Grotesque',sans-serif",
               fontSize: 'clamp(1.4rem,2.8vw,2.4rem)',
-              fontWeight: 800,
-              letterSpacing: '-0.02em',
-              lineHeight: 1.05,
-              color: '#ffffff',
+              fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.05, color: '#ffffff',
               transform: active ? 'translateY(0)' : 'translateY(110%)',
               transition: 'transform 0.7s cubic-bezier(0.16,1,0.3,1)',
             }}>
@@ -143,12 +141,9 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
           <p style={{
             fontFamily: "'Outfit',sans-serif",
             fontSize: 'clamp(0.8rem,1.2vw,0.92rem)',
-            color: 'rgba(255,255,255,0.38)',
-            lineHeight: 1.65,
-            maxWidth: 360,
-            marginBottom: '1.2rem',
-            opacity: active ? 1 : 0,
-            transition: 'opacity 0.5s ease 0.1s',
+            color: 'rgba(255,255,255,0.38)', lineHeight: 1.65,
+            maxWidth: 360, marginBottom: '1.2rem',
+            opacity: active ? 1 : 0, transition: 'opacity 0.5s ease 0.1s',
           }}>
             {project.description}
           </p>
@@ -157,12 +152,9 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.6rem' }}>
             {project.techStack.slice(0, 4).map(tag => (
               <span key={tag} className="font-body text-xs px-2.5 py-0.5 rounded-full" style={{
-                color: '#FF4D00',
-                background: 'rgba(255,77,0,0.08)',
-                border: '1px solid rgba(255,77,0,0.18)',
-                letterSpacing: '0.04em',
-                opacity: active ? 1 : 0,
-                transition: 'opacity 0.4s ease 0.15s',
+                color: '#FF4D00', background: 'rgba(255,77,0,0.08)',
+                border: '1px solid rgba(255,77,0,0.18)', letterSpacing: '0.04em',
+                opacity: active ? 1 : 0, transition: 'opacity 0.4s ease 0.15s',
               }}>{tag}</span>
             ))}
           </div>
@@ -181,9 +173,9 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
                   fontSize: '0.72rem', fontWeight: 700,
                   letterSpacing: '0.1em', textTransform: 'uppercase',
                   textDecoration: 'none',
-                  transition: 'transform 0.2s ease, opacity 0.4s ease',
-                  transform: hovered ? 'scale(1.05)' : 'scale(1)',
                   opacity: active ? 1 : 0,
+                  transform: hovered ? 'scale(1.05)' : 'scale(1)',
+                  transition: 'transform 0.2s ease, opacity 0.4s ease',
                 }}
                 onClick={e => e.stopPropagation()}
               >
@@ -197,14 +189,12 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
                 rel="noopener noreferrer"
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                  color: 'rgba(255,255,255,0.5)',
-                  borderRadius: 999, padding: '0.58rem 0.9rem',
-                  fontSize: '0.72rem',
+                  color: 'rgba(255,255,255,0.5)', borderRadius: 999,
+                  padding: '0.58rem 0.9rem', fontSize: '0.72rem',
                   background: 'rgba(255,255,255,0.06)',
                   border: '1px solid rgba(255,255,255,0.1)',
                   textDecoration: 'none',
-                  opacity: active ? 1 : 0,
-                  transition: 'opacity 0.4s ease',
+                  opacity: active ? 1 : 0, transition: 'opacity 0.4s ease',
                 }}
               >
                 <GithubIcon size={13} /> Code
@@ -213,7 +203,7 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
           </div>
         </div>
 
-        {/* Active bottom line */}
+        {/* Active bottom accent */}
         <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{
           height: 2,
           background: 'linear-gradient(to right, transparent, #FF4D00 30%, #FF2D55 70%, transparent)',
@@ -222,11 +212,6 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
           borderRadius: '0 0 20px 20px',
         }} />
       </motion.div>
-
-      {/* Progress dots — right edge */}
-      <div style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', display: 'flex', flexDirection: 'column', gap: '0.5rem', pointerEvents: 'none' }}>
-        {/* rendered in parent */}
-      </div>
     </div>
   )
 }
@@ -246,26 +231,28 @@ export default function ProjectsSection() {
 
   useEffect(() => {
     api.get('/projects')
-      .then((r: { data: Project[] }) => { setProjects(r.data.filter(p => p.featured)); setLoading(false) })
+      .then((r: { data: Project[] }) => {
+        setProjects(r.data.filter(p => p.featured))
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
 
-  // ── Scroll drives x directly — no spring lag so first/last project never skips ──
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
   })
-  const xPx = useMotionValue(0)
+
+  // Direct transform — NO spring, perfectly synced so first/last project
+  // is always at the correct position when section pins.
+  const n = projects.length || 1
+  const x = useTransform(scrollYProgress, v => -v * (n - 1) * winW)
 
   useMotionValueEvent(scrollYProgress, 'change', v => {
-    if (!projects.length) return
-    const n = projects.length
-    xPx.set(-v * (n - 1) * winW)
-    setActiveIdx(Math.min(Math.round(v * (n - 1)), n - 1))
+    const count = projects.length
+    if (!count) return
+    setActiveIdx(Math.min(Math.round(v * (count - 1)), count - 1))
   })
-
-  // Silky spring just for visual smoothing of the track (not positional — very tight spring)
-  const x = useSpring(xPx, { stiffness: 140, damping: 28, mass: 0.8 })
 
   if (loading) return (
     <section id="projects" style={{ background: '#080808', height: '50vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -274,15 +261,25 @@ export default function ProjectsSection() {
   )
   if (!projects.length) return null
 
-  const n = projects.length
+  const total = projects.length
 
   return (
     <section
       id="projects"
       ref={containerRef}
-      style={{ height: `${n * 100}vh`, position: 'relative', background: '#080808' }}
+      style={{
+        height: `${total * 100}vh`,
+        position: 'relative',
+        background: '#080808',
+        // Crisp top edge — no bleed from ServicesSection
+        isolation: 'isolate',
+      }}
     >
-      <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', background: '#080808' }}>
+      {/* Sticky viewport */}
+      <div style={{
+        position: 'sticky', top: 0, height: '100vh',
+        overflow: 'hidden', background: '#080808',
+      }}>
 
         {/* Section label */}
         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
@@ -291,11 +288,11 @@ export default function ProjectsSection() {
           </p>
         </div>
 
-        {/* Horizontal track — x synced to scroll */}
+        {/* Horizontal track — perfectly synced to scroll, zero lag */}
         <motion.div style={{
           x,
           display: 'flex',
-          width: `${n * 100}vw`,
+          width: `${total * 100}vw`,
           height: '100%',
           position: 'absolute', top: 0, left: 0,
           willChange: 'transform',
@@ -312,7 +309,9 @@ export default function ProjectsSection() {
               animate={{
                 height: activeIdx === i ? 28 : 8,
                 width: activeIdx === i ? 3 : 2,
-                background: activeIdx === i ? 'linear-gradient(to bottom,#FF4D00,#FF2D55)' : 'rgba(255,255,255,0.2)',
+                background: activeIdx === i
+                  ? 'linear-gradient(to bottom,#FF4D00,#FF2D55)'
+                  : 'rgba(255,255,255,0.2)',
                 opacity: activeIdx === i ? 1 : 0.35,
               }}
               transition={{ duration: 0.35, ease: EASE }}
@@ -320,11 +319,11 @@ export default function ProjectsSection() {
             />
           ))}
           <span className="font-body tabular-nums mt-1" style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.08em' }}>
-            {String(activeIdx + 1).padStart(2, '0')}/{String(n).padStart(2, '0')}
+            {String(activeIdx + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}
           </span>
         </div>
 
-        {/* Scroll hint — fades out after first project */}
+        {/* Scroll hint */}
         <motion.div
           className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-3 pointer-events-none"
           animate={{ opacity: activeIdx > 0 ? 0 : 0.55 }}
