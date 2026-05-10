@@ -4,48 +4,32 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 export default function NeonWaveSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
-  const waveRef    = useRef<HTMLDivElement>(null)
+  const archRef    = useRef<HTMLDivElement>(null)
   const glowRef    = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const section = sectionRef.current
-    const wave    = waveRef.current
+    const arch    = archRef.current
     const glow    = glowRef.current
-    if (!section || !wave || !glow) return
+    if (!section || !arch || !glow) return
 
-    // Main arch rises from below as user scrolls through the section
-    gsap.fromTo(wave,
-      { yPercent: 55 },
-      {
-        yPercent: -10,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: 1.8,
-        },
-      }
-    )
+    // Arch rises from hidden-below to its resting position as you scroll through the section.
+    // "none" ease + scrub = 1:1 with scroll speed (cinematic feel).
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: section,
+        start: 'top bottom',   // animation begins when section enters viewport
+        end:   'bottom top',   // ends when section exits viewport top
+        scrub: 2,
+      },
+    })
 
-    // Ambient glow layer moves slightly faster — depth illusion
-    gsap.fromTo(glow,
-      { yPercent: 70 },
-      {
-        yPercent: 0,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: 2.4,
-        },
-      }
-    )
+    // Arch: starts far below, rises to natural position
+    tl.fromTo(arch, { y: '48vh' }, { y: '0vh', ease: 'none' }, 0)
+    // Glow: slightly slower parallax for depth
+    tl.fromTo(glow, { y: '60vh' }, { y: '0vh', ease: 'none' }, 0)
 
-    return () => {
-      ScrollTrigger.getAll().forEach(t => t.kill())
-    }
+    return () => { tl.scrollTrigger?.kill() }
   }, [])
 
   return (
@@ -53,44 +37,65 @@ export default function NeonWaveSection() {
       ref={sectionRef}
       style={{
         position: 'relative',
-        height: '130vh',
+        height: '150vh',
         background: '#000000',
+        // Clip bottom half of ellipse so only the top arch is ever visible
         overflow: 'hidden',
       }}
     >
-      {/* Outer ambient glow — wide, blurry, slower */}
-      <div ref={glowRef} style={{
-        position: 'absolute',
-        width: '200vw',
-        height: '200vw',
-        borderRadius: '50%',
-        background: 'radial-gradient(ellipse at center, rgba(255,60,200,0.22) 0%, rgba(200,0,255,0.12) 40%, transparent 70%)',
-        left: '50%',
-        bottom: '-110vw',
-        transform: 'translateX(-50%)',
-        filter: 'blur(60px)',
-        pointerEvents: 'none',
-      }} />
+      {/* Outer ambient glow — wider, softer, slower scroll */}
+      <div
+        ref={glowRef}
+        style={{
+          position: 'absolute',
+          // Wider and taller than the arch for a bleed-out bloom effect
+          width: '200vw',
+          height: '110vh',
+          borderRadius: '50%',
+          background: 'radial-gradient(ellipse at 50% 60%, rgba(255,80,210,0.18) 0%, rgba(200,0,200,0.08) 50%, transparent 75%)',
+          filter: 'blur(40px)',
+          // Center the glow at section bottom (overflow clips the bottom half)
+          bottom: '-55vh',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          pointerEvents: 'none',
+        }}
+      />
 
-      {/* Main neon arch */}
-      <div ref={waveRef} style={{
-        position: 'absolute',
-        width: '160vw',
-        height: '160vw',
-        borderRadius: '50%',
-        // Radial: bright hot-pink centre → deep magenta → fades to black
-        background: 'radial-gradient(ellipse at 50% 38%, #ffb3f0 0%, #ff4fd8 18%, #e800a8 42%, #8b0066 65%, #3a0030 82%, transparent 100%)',
-        boxShadow: [
-          '0 0  80px rgba(255,  0,180,0.55)',
-          '0 0 180px rgba(230,  0,255,0.30)',
-          '0 0 340px rgba(180,  0,200,0.18)',
-          '0 0 500px rgba(140,  0,170,0.10)',
-        ].join(','),
-        left: '50%',
-        bottom: '-92vw',
-        transform: 'translateX(-50%)',
-        pointerEvents: 'none',
-      }} />
+      {/* Main neon arch — ellipse wider than viewport, shorter in height */}
+      <div
+        ref={archRef}
+        style={{
+          position: 'absolute',
+          // Wide so the arch sweeps across the full viewport width
+          width: '160vw',
+          // Short enough that the arch shows only 35-40% of the viewport
+          height: '90vh',
+          borderRadius: '50%',
+          // Hot pink center fading to deep magenta at edges
+          background: [
+            'radial-gradient(',
+            '  ellipse at 50% 40%,',
+            '  #ffb0ec 0%,',
+            '  #ff4fd8 20%,',
+            '  #e000a0 45%,',
+            '  rgba(130,0,90,0.6) 68%,',
+            '  transparent 85%',
+            ')',
+          ].join(''),
+          boxShadow: [
+            '0 0  60px rgba(255,  0,180,0.5)',
+            '0 0 140px rgba(230,  0,240,0.25)',
+            '0 0 280px rgba(180,  0,200,0.12)',
+          ].join(','),
+          // Center the ellipse at the section's bottom edge;
+          // overflow:hidden clips the bottom half so only the top arch shows.
+          bottom: '-45vh',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          pointerEvents: 'none',
+        }}
+      />
     </section>
   )
 }
