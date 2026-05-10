@@ -36,7 +36,7 @@ const CAT_SUB: Record<string, string> = {
   other:     'Design · Creative',
 }
 
-// ─── Cinematic scene — one per project ────────────────────────────────────
+// ─── One cinematic scene — all hooks at top, no early returns ─────────────
 function ProjectScene({
   project,
   index,
@@ -48,34 +48,29 @@ function ProjectScene({
   total: number
   scrollYProgress: MotionValue<number>
 }) {
-  const s0 = index / total
-  const s1 = (index + 1) / total
+  const s0  = index / total
+  const s1  = (index + 1) / total
   const dur = s1 - s0
 
-  // Scene fade in/out
-  const opacity = useSpring(
-    useTransform(scrollYProgress,
-      [s0, s0 + dur * 0.22, s0 + dur * 0.78, s1],
-      [0,   1,               1,               0]),
-    { stiffness: 80, damping: 24 }
-  )
+  // ── ALL hooks at the top — no conditions, no JSX calls ──
+  const rawOpacity = useTransform(scrollYProgress,
+    [s0, s0 + dur * 0.22, s0 + dur * 0.78, s1],
+    [0, 1, 1, 0])
+  const opacity = useSpring(rawOpacity, { stiffness: 80, damping: 24 })
 
-  // ── Layer 1: giant background number (slowest parallax) ──
   const numY = useTransform(scrollYProgress, [s0, s1], ['4%', '-4%'])
 
-  // ── Layer 2: portal card (medium parallax) ──
   const portalScale = useTransform(scrollYProgress,
     [s0, s0 + dur * 0.25, s0 + dur * 0.75, s1],
     [0.84, 1, 1, 0.95])
   const portalY = useTransform(scrollYProgress,
     [s0, s0 + dur * 0.25, s0 + dur * 0.75, s1],
-    [70,  0,  0, -28])
-  const portalBlur = useTransform(scrollYProgress,
-    [s0, s0 + dur * 0.22],
-    [14, 0])
+    [70, 0, 0, -28])
+  const rawBlur = useTransform(scrollYProgress, [s0, s0 + dur * 0.22], [14, 0])
+  const portalFilter = useTransform(rawBlur, v => `blur(${v}px)`)
+
   const imgParallax = useTransform(scrollYProgress, [s0, s1], ['6%', '-6%'])
 
-  // ── Layer 3: title (faster than portal) ──
   const titleY = useTransform(scrollYProgress,
     [s0, s0 + dur * 0.25, s0 + dur * 0.75, s1],
     [90, 0, 0, -35])
@@ -83,7 +78,6 @@ function ProjectScene({
     [s0, s0 + dur * 0.2, s0 + dur * 0.8, s1],
     [0, 1, 1, 0])
 
-  // ── Layer 4: foreground silhouette (fastest parallax — "closest" to viewer) ──
   const fgY = useTransform(scrollYProgress,
     [s0, s0 + dur * 0.25, s0 + dur * 0.75, s1],
     [110, 0, 0, -45])
@@ -91,48 +85,38 @@ function ProjectScene({
     [s0, s0 + dur * 0.18, s0 + dur * 0.82, s1],
     [0, 1, 1, 0])
 
-  // ── Layer 5: meta / buttons (above fg) ──
-  const metaOpacity = useTransform(scrollYProgress,
-    [s0 + dur * 0.15, s0 + dur * 0.32, s0 + dur * 0.78, s1],
-    [0, 1, 1, 0])
   const metaY = useTransform(scrollYProgress,
     [s0, s0 + dur * 0.3, s1],
     [40, 0, -18])
+  const metaOpacity = useTransform(scrollYProgress,
+    [s0 + dur * 0.15, s0 + dur * 0.32, s0 + dur * 0.78, s1],
+    [0, 1, 1, 0])
 
   const glowRgb = CAT_GLOW[project.category] ?? CAT_GLOW.other
   const sub     = CAT_SUB[project.category]  ?? CAT_SUB.other
-  const num     = String(index + 1).padStart(2, '0')
 
   return (
-    <motion.div
-      style={{ opacity, position: 'absolute', inset: 0, zIndex: 1 }}
-    >
-      {/* ══ LAYER 0: atmospheric radial glow ══ */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: '85vw', height: '85vw',
-          top: '50%', left: '50%',
-          transform: 'translate(-50%, -55%)',
-          borderRadius: '50%',
-          background: `radial-gradient(circle, rgba(${glowRgb},0.18) 0%, transparent 65%)`,
-          filter: 'blur(70px)',
-        }}
-      />
-      {/* secondary tighter glow */}
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          width: '40vw', height: '40vw',
-          top: '50%', left: '50%',
-          transform: 'translate(-50%, -52%)',
-          borderRadius: '50%',
-          background: `radial-gradient(circle, rgba(${glowRgb},0.12) 0%, transparent 70%)`,
-          filter: 'blur(30px)',
-        }}
-      />
+    <motion.div style={{ opacity, position: 'absolute', inset: 0, zIndex: 1 }}>
 
-      {/* ══ LAYER 1: giant ghost number behind everything ══ */}
+      {/* LAYER 0 — atmospheric glow */}
+      <div className="absolute pointer-events-none" style={{
+        width: '85vw', height: '85vw',
+        top: '50%', left: '50%',
+        transform: 'translate(-50%,-55%)',
+        borderRadius: '50%',
+        background: `radial-gradient(circle, rgba(${glowRgb},0.18) 0%, transparent 65%)`,
+        filter: 'blur(70px)',
+      }} />
+      <div className="absolute pointer-events-none" style={{
+        width: '40vw', height: '40vw',
+        top: '50%', left: '50%',
+        transform: 'translate(-50%,-52%)',
+        borderRadius: '50%',
+        background: `radial-gradient(circle, rgba(${glowRgb},0.12) 0%, transparent 70%)`,
+        filter: 'blur(30px)',
+      }} />
+
+      {/* LAYER 1 — giant ghost number (slowest) */}
       <motion.div
         style={{ y: numY }}
         className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
@@ -146,17 +130,13 @@ function ProjectScene({
           lineHeight: 1,
           color: 'rgba(255,255,255,0.025)',
         }}>
-          {num}
+          {String(index + 1).padStart(2, '0')}
         </span>
       </motion.div>
 
-      {/* ══ LAYER 2: portal card (mid-ground) ══ */}
+      {/* LAYER 2 — portal card (mid-ground) */}
       <motion.div
-        style={{
-          scale: portalScale,
-          y: portalY,
-          filter: useTransform(portalBlur, v => `blur(${v}px)`),
-        }}
+        style={{ scale: portalScale, y: portalY, filter: portalFilter }}
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
       >
         <div style={{
@@ -196,17 +176,13 @@ function ProjectScene({
               }}>{project.title[0]}</span>
             </div>
           )}
-
-          {/* Portal vignette */}
           <div className="absolute inset-0 pointer-events-none" style={{
             background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, transparent 35%, rgba(0,0,0,0.65) 100%)',
           }} />
-          {/* Orange glow border */}
           <div className="absolute inset-0 pointer-events-none" style={{
             boxShadow: `inset 0 0 0 1px rgba(${glowRgb},0.25)`,
             borderRadius: 18,
           }} />
-          {/* Bottom accent line */}
           <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{
             height: 2,
             background: 'linear-gradient(to right, transparent, #FF4D00 30%, #FF2D55 70%, transparent)',
@@ -214,19 +190,17 @@ function ProjectScene({
         </div>
       </motion.div>
 
-      {/* ══ LAYER 3: title — overlaps bottom of portal ══ */}
-      <motion.div
-        style={{
-          y: titleY,
-          opacity: titleOpacity,
-          position: 'absolute',
-          bottom: '22%',
-          left: 0, right: 0,
-          zIndex: 3,
-          padding: '0 max(2.5rem, calc((100% - min(72vw,920px))/2))',
-          pointerEvents: 'none',
-        }}
-      >
+      {/* LAYER 3 — title overlapping portal bottom */}
+      <motion.div style={{
+        y: titleY,
+        opacity: titleOpacity,
+        position: 'absolute',
+        bottom: '22%',
+        left: 0, right: 0,
+        zIndex: 3,
+        padding: '0 max(2.5rem, calc((100% - min(72vw,920px))/2))',
+        pointerEvents: 'none',
+      }}>
         <h3 style={{
           fontFamily: "'Bricolage Grotesque', sans-serif",
           fontSize: 'clamp(2.4rem, 6vw, 5.5rem)',
@@ -240,21 +214,19 @@ function ProjectScene({
         </h3>
       </motion.div>
 
-      {/* ══ LAYER 4: foreground silhouette (closest to viewer, fastest) ══ */}
-      <motion.div
-        style={{
-          y: fgY,
-          opacity: fgOpacity,
-          position: 'absolute',
-          bottom: '-4%',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          zIndex: 4,
-          width: 'min(65vw, 800px)',
-          pointerEvents: 'none',
-          userSelect: 'none',
-        }}
-      >
+      {/* LAYER 4 — foreground silhouette (fastest, closest) */}
+      <motion.div style={{
+        y: fgY,
+        opacity: fgOpacity,
+        position: 'absolute',
+        bottom: '-4%',
+        left: '50%',
+        x: '-50%',
+        zIndex: 4,
+        width: 'min(65vw, 800px)',
+        pointerEvents: 'none',
+        userSelect: 'none',
+      }}>
         <img
           src="/images/scene-foreground.png"
           alt=""
@@ -268,33 +240,22 @@ function ProjectScene({
         />
       </motion.div>
 
-      {/* ══ LAYER 5: meta + buttons (above foreground) ══ */}
-      <motion.div
-        style={{
-          y: metaY,
-          opacity: metaOpacity,
-          position: 'absolute',
-          bottom: '6%',
-          left: 0, right: 0,
-          zIndex: 5,
-          padding: '0 max(2.5rem, calc((100% - min(72vw,920px))/2))',
-        }}
-      >
+      {/* LAYER 5 — meta + buttons */}
+      <motion.div style={{
+        y: metaY,
+        opacity: metaOpacity,
+        position: 'absolute',
+        bottom: '6%',
+        left: 0, right: 0,
+        zIndex: 5,
+        padding: '0 max(2.5rem, calc((100% - min(72vw,920px))/2))',
+      }}>
         <div className="flex items-end justify-between gap-4 flex-wrap">
-          {/* Left */}
           <div className="flex flex-col gap-2">
-            <p className="font-body uppercase tracking-widest" style={{
-              fontSize: '0.65rem',
-              color: 'rgba(255,255,255,0.3)',
-              letterSpacing: '0.2em',
-            }}>
+            <p className="font-body uppercase tracking-widest" style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.2em' }}>
               {sub}
             </p>
-            <p className="font-body leading-relaxed" style={{
-              fontSize: '0.82rem',
-              color: 'rgba(255,255,255,0.38)',
-              maxWidth: 360,
-            }}>
+            <p className="font-body leading-relaxed" style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.38)', maxWidth: 360 }}>
               {project.description}
             </p>
             <div className="flex flex-wrap gap-1.5 mt-0.5">
@@ -308,44 +269,27 @@ function ProjectScene({
               ))}
             </div>
           </div>
-
-          {/* Right: buttons */}
           <div className="flex items-center gap-2 flex-shrink-0">
             {project.liveUrl && (
-              <a
-                href={project.liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-body font-bold text-black hover:scale-105 transition-transform active:scale-95"
+              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
+                className="font-body font-bold text-black hover:scale-105 active:scale-95 transition-transform"
                 style={{
-                  background: '#ffffff',
-                  borderRadius: 999,
-                  padding: '0.6rem 1.4rem',
-                  fontSize: '0.72rem',
-                  letterSpacing: '0.1em',
-                  textTransform: 'uppercase',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                }}
-              >
+                  background: '#ffffff', borderRadius: 999,
+                  padding: '0.6rem 1.4rem', fontSize: '0.72rem',
+                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                  display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                }}>
                 Checkout ↗
               </a>
             )}
             {project.githubUrl && (
-              <a
-                href={project.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <a href={project.githubUrl} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-1.5 font-body text-white/50 hover:text-white transition-colors"
                 style={{
-                  fontSize: '0.72rem',
-                  padding: '0.6rem 1rem',
-                  borderRadius: 999,
-                  background: 'rgba(255,255,255,0.06)',
+                  fontSize: '0.72rem', padding: '0.6rem 1rem',
+                  borderRadius: 999, background: 'rgba(255,255,255,0.06)',
                   border: '1px solid rgba(255,255,255,0.1)',
-                }}
-              >
+                }}>
                 <GithubIcon size={12} /> Code
               </a>
             )}
@@ -356,7 +300,7 @@ function ProjectScene({
   )
 }
 
-// ─── Progress indicator ───────────────────────────────────────────────────
+// ─── Progress dots ────────────────────────────────────────────────────────
 function ProgressDots({ total, scrollYProgress }: { total: number; scrollYProgress: MotionValue<number> }) {
   const [active, setActive] = useState(0)
   useEffect(() => {
@@ -386,11 +330,20 @@ function ProgressDots({ total, scrollYProgress }: { total: number; scrollYProgre
   )
 }
 
-// ─── Section ──────────────────────────────────────────────────────────────
+// ─── Main section ─────────────────────────────────────────────────────────
 export default function ProjectsSection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
+
+  // useScroll must be at top — always called, even during loading
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ['start start', 'end end'],
+  })
+
+  // Scroll hint opacity — must be at top before any returns
+  const hintOpacity = useTransform(scrollYProgress, [0, 0.25], [0.55, 0])
 
   useEffect(() => {
     api.get('/projects')
@@ -401,16 +354,12 @@ export default function ProjectsSection() {
       .catch(() => setLoading(false))
   }, [])
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
-  })
-
   if (loading) return (
     <section id="projects" style={{ background: '#080808', height: '50vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div className="w-10 h-10 rounded-full border-2 animate-spin" style={{ borderColor: '#FF4D00', borderTopColor: 'transparent' }} />
     </section>
   )
+
   if (!projects.length) return null
 
   return (
@@ -444,7 +393,7 @@ export default function ProjectsSection() {
         {/* Scroll hint */}
         <motion.div
           className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1.5 pointer-events-none"
-          style={{ opacity: useTransform(scrollYProgress, [0, 1 / projects.length], [0.55, 0]) }}
+          style={{ opacity: hintOpacity }}
         >
           <span className="font-body text-xs tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>Scroll</span>
           <motion.div className="w-px bg-white/15" style={{ height: 28 }}
