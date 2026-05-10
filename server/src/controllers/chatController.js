@@ -1,6 +1,10 @@
 const Groq = require('groq-sdk')
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+let groq
+function getGroq() {
+  if (!groq) groq = new Groq({ apiKey: process.env.GROQ_API_KEY })
+  return groq
+}
 
 const SYSTEM_PROMPT = `You are Sharjeel's portfolio assistant — a helpful, friendly AI on Sharjeel Ahmed Pawar's personal portfolio website.
 
@@ -50,7 +54,7 @@ exports.chat = async (req, res) => {
       return res.status(400).json({ error: 'messages array is required' })
     }
 
-    const completion = await groq.chat.completions.create({
+    const completion = await getGroq().chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
