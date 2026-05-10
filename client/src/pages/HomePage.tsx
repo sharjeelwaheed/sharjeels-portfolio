@@ -10,6 +10,7 @@ import SkillsSection from '@/components/sections/SkillsSection'
 import TimelineSection from '@/components/sections/TimelineSection'
 import ServicesSection from '@/components/sections/ServicesSection'
 import ContactSection from '@/components/sections/ContactSection'
+import NeonWaveSection from '@/components/sections/NeonWaveSection'
 
 export default function HomePage() {
   const [ready, setReady] = useState(false)
@@ -26,6 +27,7 @@ export default function HomePage() {
             <AboutSection />
             <ServicesSection />
             <ProjectsSection />
+            <NeonWaveSection />
             <SkillsSection />
             <TimelineSection />
             <ContactSection />
