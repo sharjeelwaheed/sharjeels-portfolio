@@ -42,8 +42,7 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
     >
       <div className="absolute inset-0 pointer-events-none" style={{
         background: `radial-gradient(ellipse 70% 60% at 50% 48%, ${glow} 0%, transparent 70%)`,
-        opacity: active ? 1 : 0,
-        transition: 'opacity 0.7s ease',
+        opacity: active ? 1 : 0, transition: 'opacity 0.7s ease',
       }} />
 
       <motion.div
@@ -51,27 +50,20 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
         transition={{ duration: 0.6, ease: EASE }}
         className="relative overflow-hidden w-full"
         style={{
-          maxWidth: 1060,
-          height: 'min(74vh, 560px)',
-          borderRadius: 20,
-          background: '#0f0f0f',
-          border: '1px solid rgba(255,255,255,0.06)',
+          maxWidth: 1060, height: 'min(74vh, 560px)', borderRadius: 20,
+          background: '#0f0f0f', border: '1px solid rgba(255,255,255,0.06)',
           boxShadow: active
             ? '0 50px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,77,0,0.12)'
             : '0 20px 50px rgba(0,0,0,0.4)',
-          display: 'flex',
-          transition: 'box-shadow 0.6s ease',
+          display: 'flex', transition: 'box-shadow 0.6s ease',
         }}
       >
         {/* Image left 55% */}
         <div style={{ width: '55%', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           {project.imageUrl ? (
-            <img
-              src={project.imageUrl}
-              alt={project.title}
+            <img src={project.imageUrl} alt={project.title}
               style={{
-                width: '100%', height: '100%',
-                objectFit: 'cover', objectPosition: 'center top',
+                width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top',
                 transform: active ? 'scale(1)' : 'scale(1.04)',
                 transition: 'transform 0.8s cubic-bezier(0.16,1,0.3,1)',
               }}
@@ -83,20 +75,17 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <span style={{
-                fontFamily: "'Bricolage Grotesque',sans-serif",
-                fontSize: '7rem', fontWeight: 900,
+                fontFamily: "'Bricolage Grotesque',sans-serif", fontSize: '7rem', fontWeight: 900,
                 background: 'linear-gradient(135deg,#FF4D00,#FF2D55)',
                 WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', opacity: 0.15,
               }}>{project.title[0]}</span>
             </div>
           )}
-          <div className="absolute inset-0 pointer-events-none" style={{
-            background: 'linear-gradient(to right, transparent 55%, #0f0f0f 100%)',
-          }} />
+          <div className="absolute inset-0 pointer-events-none"
+            style={{ background: 'linear-gradient(to right, transparent 55%, #0f0f0f 100%)' }} />
           {project.featured && (
             <div className="absolute top-4 left-4 font-body text-xs px-3 py-1 rounded-full" style={{
-              background: 'rgba(255,77,0,0.15)',
-              border: '1px solid rgba(255,77,0,0.3)',
+              background: 'rgba(255,77,0,0.15)', border: '1px solid rgba(255,77,0,0.3)',
               color: '#FF4D00', letterSpacing: '0.06em',
             }}>Featured</div>
           )}
@@ -110,8 +99,8 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
         }}>
           <span style={{
             fontFamily: "'Bricolage Grotesque',sans-serif",
-            fontSize: 'clamp(3rem,7vw,6rem)',
-            fontWeight: 900, letterSpacing: '-0.05em', lineHeight: 1,
+            fontSize: 'clamp(3rem,7vw,6rem)', fontWeight: 900,
+            letterSpacing: '-0.05em', lineHeight: 1,
             background: 'linear-gradient(135deg,#FF4D00,#FF2D55)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             marginBottom: '0.5rem', display: 'block',
@@ -123,13 +112,11 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
           <div style={{ overflow: 'hidden', marginBottom: '0.6rem' }}>
             <h3 style={{
               fontFamily: "'Bricolage Grotesque',sans-serif",
-              fontSize: 'clamp(1.4rem,2.8vw,2.4rem)',
-              fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.05, color: '#ffffff',
+              fontSize: 'clamp(1.4rem,2.8vw,2.4rem)', fontWeight: 800,
+              letterSpacing: '-0.02em', lineHeight: 1.05, color: '#ffffff',
               transform: active ? 'translateY(0)' : 'translateY(110%)',
               transition: 'transform 0.7s cubic-bezier(0.16,1,0.3,1)',
-            }}>
-              {project.title}
-            </h3>
+            }}>{project.title}</h3>
           </div>
 
           <p style={{
@@ -138,9 +125,7 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
             color: 'rgba(255,255,255,0.38)', lineHeight: 1.65,
             maxWidth: 360, marginBottom: '1.2rem',
             opacity: active ? 1 : 0, transition: 'opacity 0.5s ease 0.1s',
-          }}>
-            {project.description}
-          </p>
+          }}>{project.description}</p>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.6rem' }}>
             {project.techStack.slice(0, 4).map(tag => (
@@ -154,31 +139,20 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
 
           <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
             {project.liveUrl && (
-              <a
-                href={project.liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                  background: '#ffffff', color: '#000000',
-                  borderRadius: 999, padding: '0.58rem 1.3rem',
-                  fontSize: '0.72rem', fontWeight: 700,
-                  letterSpacing: '0.1em', textTransform: 'uppercase',
-                  textDecoration: 'none',
+                  background: '#ffffff', color: '#000000', borderRadius: 999,
+                  padding: '0.58rem 1.3rem', fontSize: '0.72rem', fontWeight: 700,
+                  letterSpacing: '0.1em', textTransform: 'uppercase', textDecoration: 'none',
                   opacity: active ? 1 : 0,
                   transform: hovered ? 'scale(1.05)' : 'scale(1)',
                   transition: 'transform 0.2s ease, opacity 0.4s ease',
-                }}
-                onClick={e => e.stopPropagation()}
-              >
-                Checkout ↗
-              </a>
+                }}>Checkout ↗</a>
             )}
             {project.githubUrl && (
-              <a
-                href={project.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+              <a href={project.githubUrl} target="_blank" rel="noopener noreferrer"
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
                   color: 'rgba(255,255,255,0.5)', borderRadius: 999,
@@ -187,8 +161,7 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
                   border: '1px solid rgba(255,255,255,0.1)',
                   textDecoration: 'none',
                   opacity: active ? 1 : 0, transition: 'opacity 0.4s ease',
-                }}
-              >
+                }}>
                 <GithubIcon size={13} /> Code
               </a>
             )}
@@ -234,92 +207,84 @@ export default function ProjectsSection() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const lenis = (window as any).lenis as { stop(): void; start(): void } | undefined
 
-    let active         = false
-    let currentIdx     = 0
-    let cooldown       = false
-    let ignoreScroll   = false
+    // Mutable state kept in refs (not closures) so handlers always see latest values
+    let active     = false
+    let idx        = 0
+    let cooldown   = false
 
-    // Absolute document top of the section element
-    const getSectionTop = () => section.getBoundingClientRect().top + window.scrollY
-
-    // Snap the page scroll position to match the current project
-    // so the scrollbar stays meaningful and lenis resumes from the right spot
-    const snapPageTo = (idx: number) => {
-      ignoreScroll = true
-      window.scrollTo({ top: getSectionTop() + idx * window.innerHeight, behavior: 'instant' as ScrollBehavior })
-      setTimeout(() => { ignoreScroll = false }, 80)
+    const show = (next: number) => {
+      idx = next
+      setActiveIdx(next)
+      xRaw.set(-next * window.innerWidth)
     }
 
-    const goTo = (idx: number) => {
-      currentIdx = idx
-      setActiveIdx(idx)
-      xRaw.set(-idx * window.innerWidth)
-      snapPageTo(idx)
-    }
-
-    // Called when section enters sticky state — always show project 0 first
     const enter = () => {
       if (active) return
       active = true
       lenis?.stop()
-      goTo(0)
+      show(0)
     }
 
-    // Called when leaving the section (last project scrolled past, or scrolled back above)
-    const exit = () => {
-      if (!active) return
+    const leave = (dir: 'fwd' | 'bwd') => {
       active = false
       lenis?.start()
+      // Jump the page scroll to just outside the section so sticky releases cleanly.
+      // window.scrollTo(x, y) with two args is always instant — no browser quirks.
+      const sectionTop = section.getBoundingClientRect().top + window.scrollY
+      if (dir === 'fwd') {
+        // Place scroll right at the end of the section so the next section appears
+        window.scrollTo(0, sectionTop + (n + 1) * window.innerHeight)
+      } else {
+        // Place scroll just above the section
+        window.scrollTo(0, Math.max(0, sectionTop - 10))
+      }
     }
 
-    // Detect sticky state via scroll position
+    // Detect when section becomes sticky (top edge hits viewport top)
     const onScroll = () => {
-      if (ignoreScroll) return
-      const rect   = section.getBoundingClientRect()
-      const pinned = rect.top <= 1 && rect.bottom > window.innerHeight - 1
-      if (pinned && !active) enter()
-      if (!pinned && active) exit()
+      if (active) return
+      const rect = section.getBoundingClientRect()
+      if (rect.top <= 0 && rect.bottom > window.innerHeight) {
+        enter()
+      }
     }
 
-    // Intercept wheel — advance one project per gesture
     const onWheel = (e: WheelEvent) => {
       if (!active) return
-      e.preventDefault()
+      e.preventDefault() // prevent Lenis / native scroll while we handle it
+
       if (cooldown) return
 
       if (e.deltaY > 0) {
-        // Scroll down
-        if (currentIdx < n - 1) {
+        // scroll down
+        if (idx < n - 1) {
           cooldown = true
-          setTimeout(() => { cooldown = false }, 720)
-          goTo(currentIdx + 1)
+          setTimeout(() => { cooldown = false }, 750)
+          show(idx + 1)
         } else {
-          // Past the last project — release control to Lenis
-          exit()
+          leave('fwd')
         }
       } else if (e.deltaY < 0) {
-        // Scroll up
-        if (currentIdx > 0) {
+        // scroll up
+        if (idx > 0) {
           cooldown = true
-          setTimeout(() => { cooldown = false }, 720)
-          goTo(currentIdx - 1)
+          setTimeout(() => { cooldown = false }, 750)
+          show(idx - 1)
         } else {
-          // Before the first project — release control back (go to Services)
-          exit()
+          leave('bwd')
         }
       }
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
+    // passive:false so preventDefault() blocks native + Lenis scroll
     window.addEventListener('wheel',  onWheel,  { passive: false })
-
-    // Fire once to handle the case where page loaded already inside the section
-    onScroll()
+    onScroll() // handle case where page loads already scrolled into section
 
     return () => {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('wheel',  onWheel)
-      lenis?.start()
+      lenis?.start() // always restore Lenis on unmount
     }
   }, [projects, xRaw])
 
@@ -337,8 +302,9 @@ export default function ProjectsSection() {
       id="projects"
       ref={sectionRef}
       style={{
-        // n+1 so there's a full viewport of "exit" scroll space at the end
-        height: `${(n + 1) * 100}vh`,
+        // Extra height so sticky div has room to pin while user scrolls through all projects.
+        // We control actual project navigation via wheel events, not page scroll position.
+        height: `${(n + 2) * 100}vh`,
         position: 'relative',
         background: '#080808',
       }}
@@ -347,19 +313,18 @@ export default function ProjectsSection() {
         position: 'sticky', top: 0, height: '100vh',
         overflow: 'hidden', background: '#080808',
       }}>
-        {/* Section label */}
+        {/* Label */}
         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
-          <p className="font-body text-xs tracking-widest uppercase text-center" style={{ color: '#FF4D00', letterSpacing: '0.22em' }}>
+          <p className="font-body text-xs tracking-widest uppercase text-center"
+            style={{ color: '#FF4D00', letterSpacing: '0.22em' }}>
             Selected Projects
           </p>
         </div>
 
         {/* Horizontal track */}
         <motion.div style={{
-          x,
-          display: 'flex',
-          width: `${n * 100}vw`,
-          height: '100%',
+          x, display: 'flex',
+          width: `${n * 100}vw`, height: '100%',
           position: 'absolute', top: 0, left: 0,
           willChange: 'transform',
         }}>
@@ -373,8 +338,7 @@ export default function ProjectsSection() {
           {projects.map((_, i) => (
             <motion.div key={i}
               animate={{
-                height: activeIdx === i ? 28 : 8,
-                width:  activeIdx === i ? 3 : 2,
+                height: activeIdx === i ? 28 : 8, width: activeIdx === i ? 3 : 2,
                 background: activeIdx === i
                   ? 'linear-gradient(to bottom,#FF4D00,#FF2D55)'
                   : 'rgba(255,255,255,0.2)',
@@ -384,7 +348,8 @@ export default function ProjectsSection() {
               style={{ borderRadius: 999 }}
             />
           ))}
-          <span className="font-body tabular-nums mt-1" style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.08em' }}>
+          <span className="font-body tabular-nums mt-1"
+            style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.08em' }}>
             {String(activeIdx + 1).padStart(2, '0')}/{String(n).padStart(2, '0')}
           </span>
         </div>
@@ -395,9 +360,12 @@ export default function ProjectsSection() {
           animate={{ opacity: activeIdx > 0 ? 0 : 0.55 }}
           transition={{ duration: 0.5 }}
         >
-          <motion.div className="h-px w-8 bg-white/20" animate={{ scaleX: [1, 0.5, 1] }} transition={{ duration: 2, repeat: Infinity }} />
-          <span className="font-body text-xs tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>Scroll</span>
-          <motion.div className="h-px w-8 bg-white/20" animate={{ scaleX: [1, 0.5, 1] }} transition={{ duration: 2, repeat: Infinity, delay: 0.5 }} />
+          <motion.div className="h-px w-8 bg-white/20"
+            animate={{ scaleX: [1, 0.5, 1] }} transition={{ duration: 2, repeat: Infinity }} />
+          <span className="font-body text-xs tracking-widest uppercase"
+            style={{ color: 'rgba(255,255,255,0.3)' }}>Scroll</span>
+          <motion.div className="h-px w-8 bg-white/20"
+            animate={{ scaleX: [1, 0.5, 1] }} transition={{ duration: 2, repeat: Infinity, delay: 0.5 }} />
         </motion.div>
       </div>
     </section>
