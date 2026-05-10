@@ -5,6 +5,7 @@ import { Toaster } from 'react-hot-toast'
 
 import HomePage from '@/pages/HomePage'
 import CustomCursor from '@/components/ui/CustomCursor'
+import ChatBot from '@/components/ui/ChatBot'
 
 // Lazy load admin — not bundled with public portfolio
 const AdminLoginPage = lazy(() => import('@/pages/AdminLoginPage'))
@@ -20,6 +21,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <CustomCursor />
+      <ChatBot />
       <Toaster
         position="bottom-right"
         toastOptions={{

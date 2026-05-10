@@ -11,6 +11,7 @@ const skillRoutes = require('./routes/skillRoutes')
 const aboutRoutes = require('./routes/aboutRoutes')
 const experienceRoutes = require('./routes/experienceRoutes')
 const uploadRoutes = require('./routes/uploadRoutes')
+const chatRoutes = require('./routes/chatRoutes')
 
 connectDB()
 
@@ -32,6 +33,7 @@ app.use('/api/skills', skillRoutes)
 app.use('/api/about', aboutRoutes)
 app.use('/api/experience', experienceRoutes)
 app.use('/api/upload', uploadRoutes)
+app.use('/api/chat', chatRoutes)
 
 app.use(errorHandler)
 
