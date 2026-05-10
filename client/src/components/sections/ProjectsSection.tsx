@@ -187,7 +187,8 @@ export default function ProjectsSection() {
   const [activeIdx, setActiveIdx] = useState(0)
 
   const xRaw = useMotionValue(0)
-  const x    = useSpring(xRaw, { stiffness: 380, damping: 38, mass: 0.6 })
+  // Softer spring — feels like a natural horizontal slide, not a snap
+  const x    = useSpring(xRaw, { stiffness: 180, damping: 28, mass: 1 })
 
   useEffect(() => {
     api.get('/projects')
@@ -207,10 +208,12 @@ export default function ProjectsSection() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const lenis = (window as any).lenis as { stop(): void; start(): void } | undefined
 
-    // Mutable state kept in refs (not closures) so handlers always see latest values
-    let active     = false
-    let idx        = 0
-    let cooldown   = false
+    let active   = false
+    let idx      = 0
+    let cooldown = false
+    // Grace period after entering: absorbs trackpad inertia so it doesn't
+    // race through all projects the moment the section is reached.
+    let grace    = false
 
     const show = (next: number) => {
       idx = next
@@ -221,8 +224,11 @@ export default function ProjectsSection() {
     const enter = () => {
       if (active) return
       active = true
+      grace  = true
       lenis?.stop()
       show(0)
+      // Wait 600 ms for inertia wheel events to drain before processing navigation
+      setTimeout(() => { grace = false }, 600)
     }
 
     const leave = (dir: 'fwd' | 'bwd') => {
@@ -251,15 +257,16 @@ export default function ProjectsSection() {
 
     const onWheel = (e: WheelEvent) => {
       if (!active) return
-      e.preventDefault() // prevent Lenis / native scroll while we handle it
+      e.preventDefault()
 
-      if (cooldown) return
+      // During grace period just swallow the inertia events silently
+      if (grace || cooldown) return
 
       if (e.deltaY > 0) {
         // scroll down
         if (idx < n - 1) {
           cooldown = true
-          setTimeout(() => { cooldown = false }, 750)
+          setTimeout(() => { cooldown = false }, 900)
           show(idx + 1)
         } else {
           leave('fwd')
@@ -268,7 +275,7 @@ export default function ProjectsSection() {
         // scroll up
         if (idx > 0) {
           cooldown = true
-          setTimeout(() => { cooldown = false }, 750)
+          setTimeout(() => { cooldown = false }, 900)
           show(idx - 1)
         } else {
           leave('bwd')
