@@ -40,14 +40,12 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Glow */}
       <div className="absolute inset-0 pointer-events-none" style={{
         background: `radial-gradient(ellipse 70% 60% at 50% 48%, ${glow} 0%, transparent 70%)`,
         opacity: active ? 1 : 0,
         transition: 'opacity 0.7s ease',
       }} />
 
-      {/* Card */}
       <motion.div
         animate={{ scale: active ? 1 : 0.95, opacity: active ? 1 : 0.45 }}
         transition={{ duration: 0.6, ease: EASE }}
@@ -197,7 +195,6 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
           </div>
         </div>
 
-        {/* Bottom accent */}
         <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{
           height: 2,
           background: 'linear-gradient(to right, transparent, #FF4D00 30%, #FF2D55 70%, transparent)',
@@ -211,14 +208,13 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
 }
 
 export default function ProjectsSection() {
-  const sectionRef  = useRef<HTMLDivElement>(null)
+  const sectionRef = useRef<HTMLDivElement>(null)
   const [projects, setProjects]   = useState<Project[]>([])
   const [loading, setLoading]     = useState(true)
   const [activeIdx, setActiveIdx] = useState(0)
 
-  // Drive x directly — no Framer Motion useScroll (Lenis breaks it)
   const xRaw = useMotionValue(0)
-  const x    = useSpring(xRaw, { stiffness: 500, damping: 50, mass: 0.5 })
+  const x    = useSpring(xRaw, { stiffness: 380, damping: 38, mass: 0.6 })
 
   useEffect(() => {
     api.get('/projects')
@@ -229,35 +225,101 @@ export default function ProjectsSection() {
       .catch(() => setLoading(false))
   }, [])
 
-  // Manual scroll tracking — reads window.scrollY + element.offsetTop directly,
-  // bypassing useScroll which Lenis desynchronises.
   useEffect(() => {
     if (!projects.length) return
     const section = sectionRef.current
     if (!section) return
 
-    const n  = projects.length
-    const vh = window.innerHeight
-    const vw = window.innerWidth
+    const n     = projects.length
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const lenis = (window as any).lenis as { stop(): void; start(): void } | undefined
 
-    const update = () => {
-      const sectionTop = section.offsetTop
-      // Each project occupies one viewport height of scroll
-      const scrollRange = (n - 1) * vh
-      const raw      = (window.scrollY - sectionTop) / scrollRange
-      const progress = Math.max(0, Math.min(1, raw))
+    let active         = false
+    let currentIdx     = 0
+    let cooldown       = false
+    let ignoreScroll   = false
 
-      xRaw.set(-progress * (n - 1) * vw)
-      setActiveIdx(Math.min(Math.round(progress * (n - 1)), n - 1))
+    // Absolute document top of the section element
+    const getSectionTop = () => section.getBoundingClientRect().top + window.scrollY
+
+    // Snap the page scroll position to match the current project
+    // so the scrollbar stays meaningful and lenis resumes from the right spot
+    const snapPageTo = (idx: number) => {
+      ignoreScroll = true
+      window.scrollTo({ top: getSectionTop() + idx * window.innerHeight, behavior: 'instant' as ScrollBehavior })
+      setTimeout(() => { ignoreScroll = false }, 80)
     }
 
-    // Run once immediately so initial position is correct
-    update()
-    window.addEventListener('scroll', update, { passive: true })
-    window.addEventListener('resize', update, { passive: true })
+    const goTo = (idx: number) => {
+      currentIdx = idx
+      setActiveIdx(idx)
+      xRaw.set(-idx * window.innerWidth)
+      snapPageTo(idx)
+    }
+
+    // Called when section enters sticky state — always show project 0 first
+    const enter = () => {
+      if (active) return
+      active = true
+      lenis?.stop()
+      goTo(0)
+    }
+
+    // Called when leaving the section (last project scrolled past, or scrolled back above)
+    const exit = () => {
+      if (!active) return
+      active = false
+      lenis?.start()
+    }
+
+    // Detect sticky state via scroll position
+    const onScroll = () => {
+      if (ignoreScroll) return
+      const rect   = section.getBoundingClientRect()
+      const pinned = rect.top <= 1 && rect.bottom > window.innerHeight - 1
+      if (pinned && !active) enter()
+      if (!pinned && active) exit()
+    }
+
+    // Intercept wheel — advance one project per gesture
+    const onWheel = (e: WheelEvent) => {
+      if (!active) return
+      e.preventDefault()
+      if (cooldown) return
+
+      if (e.deltaY > 0) {
+        // Scroll down
+        if (currentIdx < n - 1) {
+          cooldown = true
+          setTimeout(() => { cooldown = false }, 720)
+          goTo(currentIdx + 1)
+        } else {
+          // Past the last project — release control to Lenis
+          exit()
+        }
+      } else if (e.deltaY < 0) {
+        // Scroll up
+        if (currentIdx > 0) {
+          cooldown = true
+          setTimeout(() => { cooldown = false }, 720)
+          goTo(currentIdx - 1)
+        } else {
+          // Before the first project — release control back (go to Services)
+          exit()
+        }
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('wheel',  onWheel,  { passive: false })
+
+    // Fire once to handle the case where page loaded already inside the section
+    onScroll()
+
     return () => {
-      window.removeEventListener('scroll', update)
-      window.removeEventListener('resize', update)
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('wheel',  onWheel)
+      lenis?.start()
     }
   }, [projects, xRaw])
 
@@ -275,13 +337,12 @@ export default function ProjectsSection() {
       id="projects"
       ref={sectionRef}
       style={{
-        // Extra vh so the last project has room to fully scroll in
-        height: `${n * 100}vh`,
+        // n+1 so there's a full viewport of "exit" scroll space at the end
+        height: `${(n + 1) * 100}vh`,
         position: 'relative',
         background: '#080808',
       }}
     >
-      {/* Sticky viewport — pins while outer section scrolls */}
       <div style={{
         position: 'sticky', top: 0, height: '100vh',
         overflow: 'hidden', background: '#080808',
@@ -313,7 +374,7 @@ export default function ProjectsSection() {
             <motion.div key={i}
               animate={{
                 height: activeIdx === i ? 28 : 8,
-                width: activeIdx === i ? 3 : 2,
+                width:  activeIdx === i ? 3 : 2,
                 background: activeIdx === i
                   ? 'linear-gradient(to bottom,#FF4D00,#FF2D55)'
                   : 'rgba(255,255,255,0.2)',
