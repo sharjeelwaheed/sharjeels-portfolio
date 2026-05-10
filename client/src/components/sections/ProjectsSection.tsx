@@ -3,7 +3,6 @@ import {
   motion,
   useScroll,
   useTransform,
-  useSpring,
   MotionValue,
 } from 'framer-motion'
 import { GithubIcon } from '@/components/ui/SocialIcons'
@@ -51,46 +50,59 @@ function ProjectScene({
   const s0  = index / total
   const s1  = (index + 1) / total
   const dur = s1 - s0
+  const isFirst = index === 0
 
-  // ── ALL hooks at the top — no conditions, no JSX calls ──
-  const rawOpacity = useTransform(scrollYProgress,
-    [s0, s0 + dur * 0.22, s0 + dur * 0.78, s1],
-    [0, 1, 1, 0])
-  const opacity = useSpring(rawOpacity, { stiffness: 80, damping: 24 })
+  // Crossfade: each scene starts fading in BEFORE its range begins (overlaps prev exit)
+  const fadeIn  = isFirst ? s0 : Math.max(0, s0 - dur * 0.18)
+  const peakIn  = isFirst ? s0 : s0 + dur * 0.12
+  const peakOut = s0 + dur * 0.8
+  const fadeOut = s1
+
+  // Scene opacity — no spring so it tracks scroll precisely (no lag = no black frames)
+  const opacity = useTransform(scrollYProgress,
+    [fadeIn, peakIn, peakOut, fadeOut],
+    [isFirst ? 1 : 0, 1, 1, 0])
+
+  // Scene 0 starts in its active position immediately; others enter from below
+  const entryY     = isFirst ? 0 : 70
+  const entryScale = isFirst ? 1 : 0.84
+  const entryBlur  = isFirst ? 0 : 14
 
   const numY = useTransform(scrollYProgress, [s0, s1], ['4%', '-4%'])
 
   const portalScale = useTransform(scrollYProgress,
-    [s0, s0 + dur * 0.25, s0 + dur * 0.75, s1],
-    [0.84, 1, 1, 0.95])
+    [s0, s0 + dur * 0.25, s0 + dur * 0.78, s1],
+    [entryScale, 1, 1, 0.95])
   const portalY = useTransform(scrollYProgress,
-    [s0, s0 + dur * 0.25, s0 + dur * 0.75, s1],
-    [70, 0, 0, -28])
-  const rawBlur = useTransform(scrollYProgress, [s0, s0 + dur * 0.22], [14, 0])
+    [s0, s0 + dur * 0.25, s0 + dur * 0.78, s1],
+    [entryY, 0, 0, -28])
+  const rawBlur = useTransform(scrollYProgress,
+    [s0, s0 + dur * 0.22],
+    [entryBlur, 0])
   const portalFilter = useTransform(rawBlur, v => `blur(${v}px)`)
 
   const imgParallax = useTransform(scrollYProgress, [s0, s1], ['6%', '-6%'])
 
   const titleY = useTransform(scrollYProgress,
-    [s0, s0 + dur * 0.25, s0 + dur * 0.75, s1],
-    [90, 0, 0, -35])
+    [s0, s0 + dur * 0.28, s0 + dur * 0.78, s1],
+    [isFirst ? 0 : 90, 0, 0, -35])
   const titleOpacity = useTransform(scrollYProgress,
-    [s0, s0 + dur * 0.2, s0 + dur * 0.8, s1],
-    [0, 1, 1, 0])
+    [fadeIn, peakIn + dur * 0.08, peakOut, fadeOut],
+    [isFirst ? 1 : 0, 1, 1, 0])
 
   const fgY = useTransform(scrollYProgress,
-    [s0, s0 + dur * 0.25, s0 + dur * 0.75, s1],
-    [110, 0, 0, -45])
+    [s0, s0 + dur * 0.28, s0 + dur * 0.78, s1],
+    [isFirst ? 0 : 110, 0, 0, -45])
   const fgOpacity = useTransform(scrollYProgress,
-    [s0, s0 + dur * 0.18, s0 + dur * 0.82, s1],
-    [0, 1, 1, 0])
+    [fadeIn, peakIn + dur * 0.05, peakOut, fadeOut],
+    [isFirst ? 1 : 0, 1, 1, 0])
 
   const metaY = useTransform(scrollYProgress,
-    [s0, s0 + dur * 0.3, s1],
-    [40, 0, -18])
+    [s0, s0 + dur * 0.32, s1],
+    [isFirst ? 0 : 40, 0, -18])
   const metaOpacity = useTransform(scrollYProgress,
-    [s0 + dur * 0.15, s0 + dur * 0.32, s0 + dur * 0.78, s1],
-    [0, 1, 1, 0])
+    [fadeIn, peakIn + dur * 0.12, peakOut, fadeOut],
+    [isFirst ? 1 : 0, 1, 1, 0])
 
   const glowRgb = CAT_GLOW[project.category] ?? CAT_GLOW.other
   const sub     = CAT_SUB[project.category]  ?? CAT_SUB.other
