@@ -6,7 +6,7 @@ const SERVICES = [
     number: '01',
     title: 'Full Stack Development',
     tags: ['React', 'Node.js', 'MongoDB'],
-    thumb: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=500&q=80',
+    thumb: 'https://sharjeels-portfolio-7irb.vercel.app/images/fullstack-cover.png',
   },
   {
     number: '02',
