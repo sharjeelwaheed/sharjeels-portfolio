@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send, MessageCircle, Bot } from 'lucide-react'
+import { X, Send } from 'lucide-react'
 import api from '@/utils/api'
 
 interface Message {
@@ -75,8 +75,11 @@ export default function ChatBot() {
               <X size={22} color="#fff" />
             </motion.span>
           ) : (
-            <motion.span key="msg" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
-              <MessageCircle size={22} color="#fff" />
+            <motion.span key="spark" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L13.8 8.2L20 10L13.8 11.8L12 18L10.2 11.8L4 10L10.2 8.2L12 2Z" fill="white" />
+                <path d="M19 16L19.9 18.1L22 19L19.9 19.9L19 22L18.1 19.9L16 19L18.1 18.1L19 16Z" fill="rgba(255,255,255,0.7)" />
+              </svg>
             </motion.span>
           )}
         </AnimatePresence>
@@ -107,13 +110,16 @@ export default function ChatBot() {
                 className="flex items-center justify-center rounded-full flex-shrink-0"
                 style={{ width: 36, height: 36, background: 'linear-gradient(135deg,#FF4D00,#FF2D55)' }}
               >
-                <Bot size={18} color="#fff" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L13.8 8.2L20 10L13.8 11.8L12 18L10.2 11.8L4 10L10.2 8.2L12 2Z" fill="white" />
+                  <path d="M19 16L19.9 18.1L22 19L19.9 19.9L19 22L18.1 19.9L16 19L18.1 18.1L19 16Z" fill="rgba(255,255,255,0.7)" />
+                </svg>
               </div>
               <div>
                 <p className="text-white text-sm font-medium leading-none mb-0.5" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>
                   Sharjeel's Assistant
                 </p>
-                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Powered by Groq · llama-3.3-70b</p>
+                <p className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>Ask me anything</p>
               </div>
               <div className="ml-auto flex items-center gap-1.5">
                 <span className="rounded-full" style={{ width: 6, height: 6, background: '#22c55e', display: 'inline-block' }} />
