@@ -2,32 +2,83 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
+gsap.registerPlugin(ScrollTrigger)
+
 export default function NeonWaveSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const archRef    = useRef<HTMLDivElement>(null)
   const glowRef    = useRef<HTMLDivElement>(null)
+  const innerRef   = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const section = sectionRef.current
     const arch    = archRef.current
     const glow    = glowRef.current
-    if (!section || !arch || !glow) return
+    const inner   = innerRef.current
+    if (!section || !arch || !glow || !inner) return
 
-    // Arch rises from hidden-below to its resting position as you scroll through the section.
-    // "none" ease + scrub = 1:1 with scroll speed (cinematic feel).
+    // Set initial states explicitly before creating timeline
+    gsap.set(arch,  { y: '60vh', scaleX: 0.7, scaleY: 0.55, filter: 'blur(20px) brightness(0.5)', opacity: 0 })
+    gsap.set(glow,  { y: '80vh', opacity: 0, scale: 0.65, filter: 'blur(70px)' })
+    gsap.set(inner, { y: '45vh', opacity: 0, scaleX: 0.75 })
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: section,
-        start: 'top bottom',   // animation begins when section enters viewport
-        end:   'bottom top',   // ends when section exits viewport top
-        scrub: 2,
+        start: 'top bottom',
+        end:   'bottom top',
+        scrub: 1.2,
+        invalidateOnRefresh: true,
       },
     })
 
-    // Arch: starts far below, rises to natural position
-    tl.fromTo(arch, { y: '48vh' }, { y: '0vh', ease: 'none' }, 0)
-    // Glow: slightly slower parallax for depth
-    tl.fromTo(glow, { y: '60vh' }, { y: '0vh', ease: 'none' }, 0)
+    // ── ARCH ─────────────────────────────────────────────────────────────
+    // Phase 1 (0→45%): emerge from below, blurry & compressed → sharp & full
+    tl.to(arch,
+      {
+        y: '0vh',
+        scaleX: 1,
+        scaleY: 1,
+        filter: 'blur(0px) brightness(1.1)',
+        opacity: 1,
+        ease: 'power2.out',
+        duration: 0.45,
+      },
+      0,
+    )
+
+    // Phase 2 (45→100%): drift upward, compress vertically, fade out
+    tl.to(arch, {
+      y: '-42vh',
+      scaleX: 1.1,
+      scaleY: 0.65,
+      filter: 'blur(10px) brightness(0.65)',
+      opacity: 0.4,
+      ease: 'power1.in',
+      duration: 0.55,
+    })
+
+    // ── GLOW — slowest parallax ──────────────────────────────────────────
+    tl.to(glow,
+      {
+        y: '-25vh',
+        opacity: 1,
+        scale: 1.3,
+        filter: 'blur(38px)',
+        ease: 'none',
+        duration: 1,
+      },
+      0,
+    )
+
+    // ── INNER — fastest layer (strongest depth pop) ──────────────────────
+    tl.to(inner,
+      { y: '-12vh', opacity: 1, scaleX: 1, ease: 'none', duration: 0.75 },
+      0.05,
+    )
+
+    // Ensure ScrollTrigger recalculates after paint
+    ScrollTrigger.refresh()
 
     return () => { tl.scrollTrigger?.kill() }
   }, [])
@@ -37,63 +88,74 @@ export default function NeonWaveSection() {
       ref={sectionRef}
       style={{
         position: 'relative',
-        height: '150vh',
+        height: '200vh',
         background: '#000000',
-        // Clip bottom half of ellipse so only the top arch is ever visible
         overflow: 'hidden',
       }}
     >
-      {/* Outer ambient glow — wider, softer, slower scroll */}
+      {/* Layer 1 — wide ambient bloom */}
       <div
         ref={glowRef}
         style={{
           position: 'absolute',
-          // Wider and taller than the arch for a bleed-out bloom effect
-          width: '200vw',
-          height: '110vh',
+          width: '240vw',
+          height: '130vh',
           borderRadius: '50%',
-          background: 'radial-gradient(ellipse at 50% 60%, rgba(255,80,210,0.18) 0%, rgba(200,0,200,0.08) 50%, transparent 75%)',
-          filter: 'blur(40px)',
-          // Center the glow at section bottom (overflow clips the bottom half)
-          bottom: '-55vh',
+          background: 'radial-gradient(ellipse at 50% 55%, rgba(255,60,200,0.18) 0%, rgba(180,0,200,0.08) 55%, transparent 80%)',
+          filter: 'blur(55px)',
+          bottom: '-65vh',
           left: '50%',
           transform: 'translateX(-50%)',
           pointerEvents: 'none',
         }}
       />
 
-      {/* Main neon arch — ellipse wider than viewport, shorter in height */}
+      {/* Layer 2 — main neon arch ellipse */}
       <div
         ref={archRef}
         style={{
           position: 'absolute',
-          // Wide so the arch sweeps across the full viewport width
           width: '160vw',
-          // Short enough that the arch shows only 35-40% of the viewport
-          height: '90vh',
+          height: '96vh',
           borderRadius: '50%',
-          // Hot pink center fading to deep magenta at edges
           background: [
             'radial-gradient(',
-            '  ellipse at 50% 40%,',
-            '  #ffb0ec 0%,',
-            '  #ff4fd8 20%,',
-            '  #e000a0 45%,',
-            '  rgba(130,0,90,0.6) 68%,',
-            '  transparent 85%',
+            '  ellipse at 50% 36%,',
+            '  #ffcaf0 0%,',
+            '  #ff50da 16%,',
+            '  #e200a5 40%,',
+            '  rgba(120,0,85,0.5) 65%,',
+            '  transparent 83%',
             ')',
           ].join(''),
           boxShadow: [
-            '0 0  60px rgba(255,  0,180,0.5)',
-            '0 0 140px rgba(230,  0,240,0.25)',
-            '0 0 280px rgba(180,  0,200,0.12)',
+            '0 0  60px rgba(255,  0,185,0.6)',
+            '0 0 140px rgba(220,  0,240,0.3)',
+            '0 0 280px rgba(170,  0,210,0.14)',
           ].join(','),
-          // Center the ellipse at the section's bottom edge;
-          // overflow:hidden clips the bottom half so only the top arch shows.
-          bottom: '-45vh',
+          bottom: '-48vh',
           left: '50%',
           transform: 'translateX(-50%)',
           pointerEvents: 'none',
+          willChange: 'transform, filter, opacity',
+        }}
+      />
+
+      {/* Layer 3 — inner bright highlight core */}
+      <div
+        ref={innerRef}
+        style={{
+          position: 'absolute',
+          width: '90vw',
+          height: '50vh',
+          borderRadius: '50%',
+          background: 'radial-gradient(ellipse at 50% 40%, rgba(255,200,245,0.6) 0%, rgba(255,80,210,0.28) 45%, transparent 75%)',
+          filter: 'blur(18px)',
+          bottom: '-25vh',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          pointerEvents: 'none',
+          willChange: 'transform, opacity',
         }}
       />
     </section>
