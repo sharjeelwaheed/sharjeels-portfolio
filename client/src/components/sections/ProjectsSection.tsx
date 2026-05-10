@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion'
+import { motion, useMotionValue, useSpring } from 'framer-motion'
 import { GithubIcon } from '@/components/ui/SocialIcons'
 import api from '@/utils/api'
 
@@ -40,7 +40,7 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Atmospheric glow */}
+      {/* Glow */}
       <div className="absolute inset-0 pointer-events-none" style={{
         background: `radial-gradient(ellipse 70% 60% at 50% 48%, ${glow} 0%, transparent 70%)`,
         opacity: active ? 1 : 0,
@@ -65,7 +65,7 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
           transition: 'box-shadow 0.6s ease',
         }}
       >
-        {/* Image — left 55% */}
+        {/* Image left 55% */}
         <div style={{ width: '55%', position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           {project.imageUrl ? (
             <img
@@ -92,7 +92,6 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
               }}>{project.title[0]}</span>
             </div>
           )}
-          {/* Fade into card */}
           <div className="absolute inset-0 pointer-events-none" style={{
             background: 'linear-gradient(to right, transparent 55%, #0f0f0f 100%)',
           }} />
@@ -105,13 +104,12 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
           )}
         </div>
 
-        {/* Content — right 45% */}
+        {/* Content right 45% */}
         <div style={{
           flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center',
           padding: 'clamp(1.5rem,3vw,2.8rem)', paddingLeft: 'clamp(1rem,2vw,1.5rem)',
           position: 'relative', zIndex: 1,
         }}>
-          {/* Number */}
           <span style={{
             fontFamily: "'Bricolage Grotesque',sans-serif",
             fontSize: 'clamp(3rem,7vw,6rem)',
@@ -124,7 +122,6 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
             {String(index + 1).padStart(2, '0')}
           </span>
 
-          {/* Title */}
           <div style={{ overflow: 'hidden', marginBottom: '0.6rem' }}>
             <h3 style={{
               fontFamily: "'Bricolage Grotesque',sans-serif",
@@ -137,7 +134,6 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
             </h3>
           </div>
 
-          {/* Description */}
           <p style={{
             fontFamily: "'Outfit',sans-serif",
             fontSize: 'clamp(0.8rem,1.2vw,0.92rem)',
@@ -148,7 +144,6 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
             {project.description}
           </p>
 
-          {/* Tags */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.6rem' }}>
             {project.techStack.slice(0, 4).map(tag => (
               <span key={tag} className="font-body text-xs px-2.5 py-0.5 rounded-full" style={{
@@ -159,7 +154,6 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
             ))}
           </div>
 
-          {/* Buttons */}
           <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
             {project.liveUrl && (
               <a
@@ -203,7 +197,7 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
           </div>
         </div>
 
-        {/* Active bottom accent */}
+        {/* Bottom accent */}
         <div className="absolute bottom-0 left-0 right-0 pointer-events-none" style={{
           height: 2,
           background: 'linear-gradient(to right, transparent, #FF4D00 30%, #FF2D55 70%, transparent)',
@@ -217,42 +211,55 @@ function ProjectCard({ project, index, active }: { project: Project; index: numb
 }
 
 export default function ProjectsSection() {
-  const containerRef = useRef<HTMLDivElement>(null)
+  const sectionRef  = useRef<HTMLDivElement>(null)
   const [projects, setProjects]   = useState<Project[]>([])
   const [loading, setLoading]     = useState(true)
   const [activeIdx, setActiveIdx] = useState(0)
-  const [winW, setWinW]           = useState(typeof window !== 'undefined' ? window.innerWidth : 1440)
 
-  useEffect(() => {
-    const update = () => setWinW(window.innerWidth)
-    window.addEventListener('resize', update)
-    return () => window.removeEventListener('resize', update)
-  }, [])
+  // Drive x directly — no Framer Motion useScroll (Lenis breaks it)
+  const xRaw = useMotionValue(0)
+  const x    = useSpring(xRaw, { stiffness: 500, damping: 50, mass: 0.5 })
 
   useEffect(() => {
     api.get('/projects')
       .then((r: { data: Project[] }) => {
-        setProjects(r.data.filter(p => p.featured))
+        setProjects(r.data.filter((p: Project) => p.featured))
         setLoading(false)
       })
       .catch(() => setLoading(false))
   }, [])
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
-  })
+  // Manual scroll tracking — reads window.scrollY + element.offsetTop directly,
+  // bypassing useScroll which Lenis desynchronises.
+  useEffect(() => {
+    if (!projects.length) return
+    const section = sectionRef.current
+    if (!section) return
 
-  // Direct transform — NO spring, perfectly synced so first/last project
-  // is always at the correct position when section pins.
-  const n = projects.length || 1
-  const x = useTransform(scrollYProgress, v => -v * (n - 1) * winW)
+    const n  = projects.length
+    const vh = window.innerHeight
+    const vw = window.innerWidth
 
-  useMotionValueEvent(scrollYProgress, 'change', v => {
-    const count = projects.length
-    if (!count) return
-    setActiveIdx(Math.min(Math.round(v * (count - 1)), count - 1))
-  })
+    const update = () => {
+      const sectionTop = section.offsetTop
+      // Each project occupies one viewport height of scroll
+      const scrollRange = (n - 1) * vh
+      const raw      = (window.scrollY - sectionTop) / scrollRange
+      const progress = Math.max(0, Math.min(1, raw))
+
+      xRaw.set(-progress * (n - 1) * vw)
+      setActiveIdx(Math.min(Math.round(progress * (n - 1)), n - 1))
+    }
+
+    // Run once immediately so initial position is correct
+    update()
+    window.addEventListener('scroll', update, { passive: true })
+    window.addEventListener('resize', update, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', update)
+      window.removeEventListener('resize', update)
+    }
+  }, [projects, xRaw])
 
   if (loading) return (
     <section id="projects" style={{ background: '#080808', height: '50vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -261,26 +268,24 @@ export default function ProjectsSection() {
   )
   if (!projects.length) return null
 
-  const total = projects.length
+  const n = projects.length
 
   return (
     <section
       id="projects"
-      ref={containerRef}
+      ref={sectionRef}
       style={{
-        height: `${total * 100}vh`,
+        // Extra vh so the last project has room to fully scroll in
+        height: `${n * 100}vh`,
         position: 'relative',
         background: '#080808',
-        // Crisp top edge — no bleed from ServicesSection
-        isolation: 'isolate',
       }}
     >
-      {/* Sticky viewport */}
+      {/* Sticky viewport — pins while outer section scrolls */}
       <div style={{
         position: 'sticky', top: 0, height: '100vh',
         overflow: 'hidden', background: '#080808',
       }}>
-
         {/* Section label */}
         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30 pointer-events-none">
           <p className="font-body text-xs tracking-widest uppercase text-center" style={{ color: '#FF4D00', letterSpacing: '0.22em' }}>
@@ -288,11 +293,11 @@ export default function ProjectsSection() {
           </p>
         </div>
 
-        {/* Horizontal track — perfectly synced to scroll, zero lag */}
+        {/* Horizontal track */}
         <motion.div style={{
           x,
           display: 'flex',
-          width: `${total * 100}vw`,
+          width: `${n * 100}vw`,
           height: '100%',
           position: 'absolute', top: 0, left: 0,
           willChange: 'transform',
@@ -319,7 +324,7 @@ export default function ProjectsSection() {
             />
           ))}
           <span className="font-body tabular-nums mt-1" style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.08em' }}>
-            {String(activeIdx + 1).padStart(2, '0')}/{String(total).padStart(2, '0')}
+            {String(activeIdx + 1).padStart(2, '0')}/{String(n).padStart(2, '0')}
           </span>
         </div>
 
