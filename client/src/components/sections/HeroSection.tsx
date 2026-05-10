@@ -289,12 +289,6 @@ export default function HeroSection({ ready = true }: { ready?: boolean }) {
         animate={ready ? { opacity: 1 } : {}}
         transition={{ delay: 1.8 }}
       >
-        <span
-          className="text-xs font-body tracking-[0.25em] uppercase"
-          style={{ color: 'rgba(255,255,255,0.2)' }}
-        >
-          Scroll
-        </span>
         <motion.div
           className="w-[1px] h-10"
           style={{ background: 'linear-gradient(to bottom, rgba(255,77,0,0.6), transparent)' }}
