@@ -49,13 +49,22 @@ export default function ProjectsSection() {
         {/* Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(480px, 1fr))', gap: '1.5rem' }}>
           {projects.map((p, i) => (
-            <div key={p._id}
+            <a key={p._id}
+              href={p.liveUrl || p.githubUrl || '#'}
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
+                display: 'block',
                 borderRadius: 16,
                 background: '#0f0f0f',
                 border: '1px solid rgba(255,255,255,0.06)',
                 overflow: 'hidden',
+                textDecoration: 'none',
+                cursor: 'pointer',
+                transition: 'border-color 0.2s',
               }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(255,77,0,0.3)')}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)')}
             >
               {/* Image */}
               <div style={{ position: 'relative', height: 260, overflow: 'hidden' }}>
@@ -161,7 +170,7 @@ export default function ProjectsSection() {
                   )}
                 </div>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>

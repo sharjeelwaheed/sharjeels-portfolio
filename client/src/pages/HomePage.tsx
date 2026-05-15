@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import LoadingScreen from '@/components/ui/LoadingScreen'
-import ScrollProgress from '@/components/ui/ScrollProgress'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import HeroSection from '@/components/sections/HeroSection'
@@ -19,8 +18,7 @@ export default function HomePage() {
       <LoadingScreen onComplete={() => setReady(true)} />
       {ready && (
         <>
-          <ScrollProgress />
-          <Navbar />
+<Navbar />
           <main>
             <HeroSection ready={ready} />
             <AboutSection />

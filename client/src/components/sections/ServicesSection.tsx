@@ -6,31 +6,36 @@ const SERVICES = [
     number: '01',
     title: 'Full Stack Development',
     tags: ['React', 'Node.js', 'MongoDB'],
-    thumb: 'https://sharjeels-portfolio-7irb.vercel.app/images/fullstack-cover.png',
+    thumb: '/images/fullstack_cover.png',
+    objectPosition: 'center center',
   },
   {
     number: '02',
     title: 'UI / UX Design',
     tags: ['Figma', 'Framer Motion', 'Tailwind'],
-    thumb: 'https://sharjeels-portfolio-7irb.vercel.app/images/uiux-cover.jpeg',
+    thumb: '/images/uiux-cover.jpeg',
+    objectPosition: 'center top',
   },
   {
     number: '03',
     title: 'AI Integration',
     tags: ['Groq', 'OpenAI', 'LLM'],
-    thumb: 'https://sharjeels-portfolio-7irb.vercel.app/images/haqooqi-cover.png',
+    thumb: '/images/haqooqi-cover.png',
+    objectPosition: 'center center',
   },
   {
     number: '04',
     title: 'Backend & API Engineering',
     tags: ['Express.js', 'JWT', 'Supabase'],
-    thumb: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=500&q=80',
+    thumb: '/images/backend_engineering.png',
+    objectPosition: 'center center',
   },
   {
     number: '05',
     title: 'Performance & Optimization',
     tags: ['Vite', 'Lighthouse', 'Web Vitals'],
-    thumb: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&q=80',
+    thumb: '/images/performance_optimization.png',
+    objectPosition: 'center center',
   },
 ]
 
@@ -177,7 +182,7 @@ export default function ServicesSection() {
                     <img
                       src={SERVICES[hovered].thumb}
                       alt={SERVICES[hovered].title}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: SERVICES[hovered].objectPosition }}
                     />
                     {/* Overlay with service name */}
                     <div
