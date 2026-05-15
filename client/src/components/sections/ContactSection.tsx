@@ -1,12 +1,9 @@
+import { useRef } from 'react'
 import { useForm } from 'react-hook-form'
-import { motion } from 'framer-motion'
+import { motion, useInView } from 'framer-motion'
 import { Mail, Send, MapPin } from 'lucide-react'
 import toast from 'react-hot-toast'
-import SectionHeading from '@/components/ui/SectionHeading'
-import GlassCard from '@/components/ui/GlassCard'
-import MagneticButton from '@/components/ui/MagneticButton'
 import { GithubIcon, LinkedinIcon, InstagramIcon } from '@/components/ui/SocialIcons'
-import { fadeUp, staggerContainer } from '@/utils/animations'
 import { SOCIAL_LINKS } from '@/utils/constants'
 
 interface FormData {
@@ -16,17 +13,31 @@ interface FormData {
 }
 
 const SOCIALS = [
-  { icon: GithubIcon, href: SOCIAL_LINKS.github, label: 'GitHub', color: '#ffffff' },
-  { icon: LinkedinIcon, href: `https://${SOCIAL_LINKS.linkedin}`, label: 'LinkedIn', color: '#0A66C2' },
-  { icon: InstagramIcon, href: `https://${SOCIAL_LINKS.instagram}`, label: 'Instagram', color: '#E1306C' },
-  { icon: Mail, href: `mailto:${SOCIAL_LINKS.email}`, label: 'Email', color: '#FF4D00' },
+  { icon: GithubIcon,   href: SOCIAL_LINKS.github,                  label: 'GitHub',    color: '#0a0a0a' },
+  { icon: LinkedinIcon, href: `https://${SOCIAL_LINKS.linkedin}`,    label: 'LinkedIn',  color: '#0A66C2' },
+  { icon: InstagramIcon,href: `https://${SOCIAL_LINKS.instagram}`,   label: 'Instagram', color: '#E1306C' },
+  { icon: Mail,         href: `mailto:${SOCIAL_LINKS.email}`,        label: 'Email',     color: '#FF4D00' },
 ]
 
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  background: '#f9f9f9',
+  border: '1px solid rgba(0,0,0,0.1)',
+  borderRadius: 12,
+  padding: '0.85rem 1.1rem',
+  fontFamily: "'Outfit', sans-serif",
+  fontSize: '0.9rem',
+  color: '#0a0a0a',
+  outline: 'none',
+  transition: 'border-color 0.2s',
+}
+
 export default function ContactSection() {
+  const headingRef = useRef(null)
+  const inView = useInView(headingRef, { once: true, margin: '-60px' })
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>()
 
   const onSubmit = async (data: FormData) => {
-    // For now, log and show success. Wire up to a backend endpoint or EmailJS later.
     console.log('Contact form:', data)
     await new Promise((r) => setTimeout(r, 800))
     toast.success("Message sent! I'll get back to you soon.")
@@ -34,146 +45,183 @@ export default function ContactSection() {
   }
 
   return (
-    <section id="contact" className="section-padding bg-primary">
-      <div className="max-w-7xl mx-auto">
+    <section id="contact" style={{ background: '#ffffff', padding: 'clamp(5rem,10vw,8rem) 0' }}>
+      <div className="max-w-7xl mx-auto px-6">
+
+        {/* Heading */}
+        <div ref={headingRef} className="mb-16">
+          <motion.span
+            initial={{ opacity: 0, x: -16 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.5 }}
+            className="text-xs font-body tracking-widest uppercase mb-4 block"
+            style={{ color: '#FF4D00', letterSpacing: '0.2em' }}
+          >
+            Get In Touch
+          </motion.span>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.1, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="font-heading font-black leading-none"
+            style={{
+              fontFamily: "'Bricolage Grotesque', sans-serif",
+              fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
+              color: '#0a0a0a',
+              letterSpacing: '-0.03em',
+            }}
+          >
+            LET'S BUILD<br />
+            <span style={{ background: 'linear-gradient(135deg,#FF4D00,#FF2D55)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              SOMETHING
+            </span>
+          </motion.h2>
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-16 items-start">
-          {/* Left */}
-          <div className="flex flex-col gap-8">
-            <SectionHeading label="Get In Touch" title="Let's Build Something Great" />
-            <motion.p
-              className="text-white/50 font-body leading-relaxed"
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
+
+          {/* Left — info */}
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.2, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            className="flex flex-col gap-8"
+          >
+            <p style={{ fontFamily: "'Outfit', sans-serif", fontSize: '0.95rem', color: 'rgba(0,0,0,0.45)', lineHeight: 1.7, maxWidth: 400 }}>
               Have a project in mind or want to collaborate? I'm always open to discussing new
               opportunities, creative ideas, and interesting problems to solve.
-            </motion.p>
+            </p>
 
-            <motion.div
-              className="flex items-center gap-3 text-white/60 font-body text-sm"
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-            >
-              <MapPin size={16} className="text-accent-orange" />
-              Gujranwala, Pakistan
-            </motion.div>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3" style={{ fontFamily: "'Outfit', sans-serif", fontSize: '0.875rem', color: 'rgba(0,0,0,0.5)' }}>
+                <MapPin size={15} color="#FF4D00" />
+                Gujranwala, Pakistan
+              </div>
+              <div className="flex items-center gap-3" style={{ fontFamily: "'Outfit', sans-serif", fontSize: '0.875rem', color: 'rgba(0,0,0,0.5)' }}>
+                <Mail size={15} color="#FF4D00" />
+                <a href={`mailto:${SOCIAL_LINKS.email}`} style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#FF4D00')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '')}>
+                  {SOCIAL_LINKS.email}
+                </a>
+              </div>
+            </div>
 
-            <motion.div
-              className="flex items-center gap-3 text-white/60 font-body text-sm"
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              transition={{ delay: 0.15 }}
-            >
-              <Mail size={16} className="text-accent-orange" />
-              <a href={`mailto:${SOCIAL_LINKS.email}`} className="hover:text-accent-orange transition-colors">
-                {SOCIAL_LINKS.email}
-              </a>
-            </motion.div>
-
-            {/* Social Icons */}
-            <motion.div
-              className="flex gap-3 mt-2"
-              variants={staggerContainer}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-            >
+            {/* Social links */}
+            <div className="flex gap-3">
               {SOCIALS.map(({ icon: Icon, href, label, color }) => (
-                <motion.div key={label} variants={fadeUp}>
-                  <MagneticButton>
-                    <a
-                      href={href}
-                      target={href.startsWith('mailto') ? undefined : '_blank'}
-                      rel="noopener noreferrer"
-                      aria-label={label}
-                      className="w-12 h-12 flex items-center justify-center rounded-full glass text-white/50 transition-all duration-300"
-                      style={{ '--hover-color': color } as React.CSSProperties}
-                      onMouseEnter={(e) => {
-                        const el = e.currentTarget
-                        el.style.color = color
-                        el.style.borderColor = `${color}50`
-                        el.style.boxShadow = `0 0 16px ${color}40`
-                      }}
-                      onMouseLeave={(e) => {
-                        const el = e.currentTarget
-                        el.style.color = ''
-                        el.style.borderColor = ''
-                        el.style.boxShadow = ''
-                      }}
-                    >
-                      <Icon size={18} />
-                    </a>
-                  </MagneticButton>
-                </motion.div>
+                <a
+                  key={label}
+                  href={href}
+                  target={href.startsWith('mailto') ? undefined : '_blank'}
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  style={{
+                    width: 44, height: 44,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    borderRadius: '50%',
+                    border: '1px solid rgba(0,0,0,0.1)',
+                    color: 'rgba(0,0,0,0.4)',
+                    textDecoration: 'none',
+                    transition: 'all 0.25s',
+                  }}
+                  onMouseEnter={e => {
+                    e.currentTarget.style.color = color
+                    e.currentTarget.style.borderColor = `${color}50`
+                    e.currentTarget.style.boxShadow = `0 0 14px ${color}30`
+                  }}
+                  onMouseLeave={e => {
+                    e.currentTarget.style.color = 'rgba(0,0,0,0.4)'
+                    e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)'
+                    e.currentTarget.style.boxShadow = ''
+                  }}
+                >
+                  <Icon size={17} />
+                </a>
               ))}
-            </motion.div>
-          </div>
+            </div>
+          </motion.div>
 
           {/* Right — Form */}
           <motion.div
-            variants={fadeUp}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
+            initial={{ opacity: 0, y: 24 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ delay: 0.3, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
-            <GlassCard className="p-8" hover={false}>
-              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
-                <div>
-                  <label className="block text-white/60 text-sm font-body mb-2">Your Name</label>
-                  <input
-                    {...register('name', { required: 'Name is required' })}
-                    placeholder="Sharjeel Pawar"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-body text-sm outline-none focus:border-accent-orange transition-colors placeholder:text-white/20"
-                  />
-                  {errors.name && <p className="text-accent-red text-xs mt-1">{errors.name.message}</p>}
-                </div>
+            <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontFamily: "'Outfit', sans-serif", fontSize: '0.8rem', color: 'rgba(0,0,0,0.45)', marginBottom: '0.4rem', letterSpacing: '0.03em' }}>
+                  Your Name
+                </label>
+                <input
+                  {...register('name', { required: 'Name is required' })}
+                  placeholder="Sharjeel Pawar"
+                  style={inputStyle}
+                  onFocus={e => (e.currentTarget.style.borderColor = '#FF4D00')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)')}
+                />
+                {errors.name && <p style={{ color: '#FF2D55', fontSize: '0.75rem', marginTop: '0.25rem' }}>{errors.name.message}</p>}
+              </div>
 
-                <div>
-                  <label className="block text-white/60 text-sm font-body mb-2">Email Address</label>
-                  <input
-                    {...register('email', {
-                      required: 'Email is required',
-                      pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Invalid email' },
-                    })}
-                    placeholder="you@example.com"
-                    type="email"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-body text-sm outline-none focus:border-accent-orange transition-colors placeholder:text-white/20"
-                  />
-                  {errors.email && <p className="text-accent-red text-xs mt-1">{errors.email.message}</p>}
-                </div>
+              <div>
+                <label style={{ display: 'block', fontFamily: "'Outfit', sans-serif", fontSize: '0.8rem', color: 'rgba(0,0,0,0.45)', marginBottom: '0.4rem', letterSpacing: '0.03em' }}>
+                  Email Address
+                </label>
+                <input
+                  {...register('email', {
+                    required: 'Email is required',
+                    pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Invalid email' },
+                  })}
+                  placeholder="you@example.com"
+                  type="email"
+                  style={inputStyle}
+                  onFocus={e => (e.currentTarget.style.borderColor = '#FF4D00')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)')}
+                />
+                {errors.email && <p style={{ color: '#FF2D55', fontSize: '0.75rem', marginTop: '0.25rem' }}>{errors.email.message}</p>}
+              </div>
 
-                <div>
-                  <label className="block text-white/60 text-sm font-body mb-2">Message</label>
-                  <textarea
-                    {...register('message', { required: 'Message is required', minLength: { value: 10, message: 'Too short' } })}
-                    placeholder="Tell me about your project..."
-                    rows={5}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white font-body text-sm outline-none focus:border-accent-orange transition-colors placeholder:text-white/20 resize-none"
-                  />
-                  {errors.message && <p className="text-accent-red text-xs mt-1">{errors.message.message}</p>}
-                </div>
+              <div>
+                <label style={{ display: 'block', fontFamily: "'Outfit', sans-serif", fontSize: '0.8rem', color: 'rgba(0,0,0,0.45)', marginBottom: '0.4rem', letterSpacing: '0.03em' }}>
+                  Message
+                </label>
+                <textarea
+                  {...register('message', { required: 'Message is required', minLength: { value: 10, message: 'Too short' } })}
+                  placeholder="Tell me about your project..."
+                  rows={5}
+                  style={{ ...inputStyle, resize: 'none' }}
+                  onFocus={e => (e.currentTarget.style.borderColor = '#FF4D00')}
+                  onBlur={e => (e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)')}
+                />
+                {errors.message && <p style={{ color: '#FF2D55', fontSize: '0.75rem', marginTop: '0.25rem' }}>{errors.message.message}</p>}
+              </div>
 
-                <MagneticButton>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-body font-medium text-white text-sm disabled:opacity-60 transition-all"
-                    style={{ background: 'linear-gradient(135deg, #FF4D00, #FF2D55)' }}
-                  >
-                    {isSubmitting ? 'Sending...' : 'Send Message'}
-                    <Send size={16} />
-                  </button>
-                </MagneticButton>
-              </form>
-            </GlassCard>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+                  padding: '0.9rem',
+                  borderRadius: 12,
+                  background: 'linear-gradient(135deg, #FF4D00, #FF2D55)',
+                  color: '#ffffff',
+                  fontFamily: "'Outfit', sans-serif",
+                  fontSize: '0.875rem',
+                  fontWeight: 600,
+                  border: 'none',
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                  opacity: isSubmitting ? 0.7 : 1,
+                  transition: 'opacity 0.2s, transform 0.2s',
+                }}
+                onMouseEnter={e => { if (!isSubmitting) e.currentTarget.style.transform = 'scale(1.01)' }}
+                onMouseLeave={e => { e.currentTarget.style.transform = '' }}
+              >
+                {isSubmitting ? 'Sending...' : 'Send Message'}
+                <Send size={15} />
+              </button>
+            </form>
           </motion.div>
+
         </div>
       </div>
     </section>
