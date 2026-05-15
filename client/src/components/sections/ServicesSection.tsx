@@ -96,7 +96,6 @@ export default function ServicesSection() {
             transition={{ duration: 0.5, ease: 'easeOut' }}
             style={{ position: 'absolute', inset: 0, zIndex: 0 }}
           >
-            {/* Image — full brightness, no filter */}
             <img
               src={SERVICES[activeIndex].thumb}
               alt=""
@@ -106,11 +105,6 @@ export default function ServicesSection() {
                 objectPosition: SERVICES[activeIndex].objectPosition,
               }}
             />
-            {/* Left-side gradient so text stays readable */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(to right, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0.1) 100%)',
-            }} />
           </motion.div>
         )}
       </AnimatePresence>
@@ -244,71 +238,6 @@ export default function ServicesSection() {
                 </div>
               </motion.div>
             ))}
-          </div>
-
-          {/* Sticky thumbnail panel — same as original */}
-          <div
-            className="hidden lg:block flex-shrink-0"
-            style={{ width: 280, position: 'sticky', top: '20vh' }}
-          >
-            <div style={{ position: 'relative', width: 280, height: 340 }}>
-              <AnimatePresence mode="wait">
-                {activeIndex !== null && (
-                  <motion.div
-                    key={activeIndex}
-                    initial={{ opacity: 0, y: 24, rotate: -4, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, rotate: -2, scale: 1 }}
-                    exit={{ opacity: 0, y: -16, rotate: 2, scale: 0.96 }}
-                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    style={{
-                      position: 'absolute', inset: 0,
-                      borderRadius: 20, overflow: 'hidden',
-                      boxShadow: '0 30px 60px rgba(0,0,0,0.18)',
-                    }}
-                  >
-                    <img
-                      src={SERVICES[activeIndex].thumb}
-                      alt={SERVICES[activeIndex].title}
-                      style={{
-                        width: '100%', height: '100%',
-                        objectFit: 'cover',
-                        objectPosition: SERVICES[activeIndex].objectPosition,
-                      }}
-                    />
-                    <div style={{
-                      position: 'absolute', bottom: 0, left: 0, right: 0,
-                      padding: '1.5rem',
-                      background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
-                    }}>
-                      <p style={{ fontFamily: "'Bricolage Grotesque', sans-serif", color: '#fff', fontWeight: 700, fontSize: '0.875rem' }}>
-                        {SERVICES[activeIndex].title}
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <AnimatePresence>
-                {activeIndex === null && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    style={{
-                      position: 'absolute', inset: 0,
-                      borderRadius: 20,
-                      border: '2px dashed rgba(0,0,0,0.08)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}
-                  >
-                    <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: '0.875rem', color: 'rgba(0,0,0,0.2)', letterSpacing: '0.05em' }}>
-                      hover a service
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
           </div>
 
         </div>
