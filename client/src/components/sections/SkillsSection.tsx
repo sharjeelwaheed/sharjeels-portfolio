@@ -36,30 +36,82 @@ function SkillBar({ skill }: { skill: Skill }) {
   )
 }
 
+// devicon slug map for logo images
+const DEVICON: Record<string, string> = {
+  'React': 'react',
+  'Node.js': 'nodejs',
+  'MongoDB': 'mongodb',
+  'TypeScript': 'typescript',
+  'JavaScript': 'javascript',
+  'Express.js': 'express',
+  'Tailwind CSS': 'tailwindcss',
+  'Framer Motion': 'framermotion',
+  'Firebase': 'firebase',
+  'HTML & CSS': 'html5',
+  'Git & GitHub': 'github',
+  'Socket.io': 'socketio',
+  'Figma': 'figma',
+  'Python': 'python',
+  'PostgreSQL': 'postgresql',
+  'Supabase': 'supabase',
+  'Vite': 'vitejs',
+  'Docker': 'docker',
+}
+
 function SkillIcon({ skill }: { skill: Skill }) {
   const color = TECH_COLORS[skill.name] || '#FF4D00'
+  const slug = DEVICON[skill.name]
   const initials = skill.name.split(/[\s.]+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase()
 
   return (
     <motion.div
       variants={scaleUp}
-      whileHover={{ rotate: 8, scale: 1.12 }}
+      whileHover={{ scale: 1.15, y: -4 }}
       className="flex flex-col items-center gap-2"
     >
       <div
-        className="w-14 h-14 rounded-2xl flex items-center justify-center font-heading font-bold text-sm"
+        className="w-14 h-14 rounded-2xl flex items-center justify-center"
         style={{
           background: `${color}15`,
           border: `1px solid ${color}30`,
-          color: color,
         }}
       >
-        {initials}
+        {slug ? (
+          <img
+            src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${slug}/${slug}-original.svg`}
+            alt={skill.name}
+            style={{ width: 32, height: 32, objectFit: 'contain' }}
+            onError={e => {
+              // fallback to plain svg variant if original doesn't exist
+              const img = e.currentTarget
+              if (!img.src.includes('plain')) {
+                img.src = `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${slug}/${slug}-plain.svg`
+              }
+            }}
+          />
+        ) : (
+          <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: '0.75rem', fontWeight: 700, color }}>{initials}</span>
+        )}
       </div>
       <span className="text-white/50 text-xs font-body text-center leading-tight">{skill.name}</span>
     </motion.div>
   )
 }
+
+const FALLBACK_SKILLS: Skill[] = [
+  { _id: '1',  name: 'React',         category: 'frontend',  proficiency: 90 },
+  { _id: '2',  name: 'TypeScript',    category: 'language',  proficiency: 85 },
+  { _id: '3',  name: 'Node.js',       category: 'backend',   proficiency: 88 },
+  { _id: '4',  name: 'MongoDB',       category: 'database',  proficiency: 82 },
+  { _id: '5',  name: 'Tailwind CSS',  category: 'frontend',  proficiency: 92 },
+  { _id: '6',  name: 'Express.js',    category: 'backend',   proficiency: 85 },
+  { _id: '7',  name: 'Figma',         category: 'tools',     proficiency: 78 },
+  { _id: '8',  name: 'JavaScript',    category: 'language',  proficiency: 92 },
+  { _id: '9',  name: 'Git & GitHub',  category: 'tools',     proficiency: 88 },
+  { _id: '10', name: 'Framer Motion', category: 'frontend',  proficiency: 80 },
+  { _id: '11', name: 'Vite',          category: 'tools',     proficiency: 85 },
+  { _id: '12', name: 'Firebase',      category: 'database',  proficiency: 75 },
+]
 
 export default function SkillsSection() {
   const [skills, setSkills] = useState<Skill[]>([])
@@ -67,7 +119,10 @@ export default function SkillsSection() {
   const headingInView = useInView(headingRef, { once: true, margin: '-80px' })
 
   useEffect(() => {
-    api.get('/skills').then((r) => setSkills(r.data)).catch(() => {})
+    api.get('/skills').then((r) => {
+      if (r.data?.length) setSkills(r.data)
+      else setSkills(FALLBACK_SKILLS)
+    }).catch(() => setSkills(FALLBACK_SKILLS))
   }, [])
 
   const grouped = SKILL_CATEGORIES.reduce((acc, cat) => {
