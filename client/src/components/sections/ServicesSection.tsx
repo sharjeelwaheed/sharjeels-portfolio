@@ -47,233 +47,175 @@ export default function ServicesSection() {
     <section
       id="services"
       ref={sectionRef}
-      style={{ position: 'relative', background: '#ffffff', padding: 'clamp(5rem,10vw,8rem) 0', overflow: 'hidden' }}
+      style={{
+        background: '#0a0a0a',
+        padding: 'clamp(5rem,10vw,8rem) 0',
+        overflow: 'hidden',
+        position: 'relative',
+      }}
     >
-      {/* Full-screen background image — appears on hover */}
-      <AnimatePresence mode="wait">
-        {hovered !== null && (
-          <motion.div
-            key={hovered}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
-            style={{ position: 'absolute', inset: 0, zIndex: 0 }}
-          >
-            <img
-              src={SERVICES[hovered].thumb}
-              alt=""
+      <div
+        className="max-w-7xl mx-auto px-6"
+        style={{ display: 'grid', gridTemplateColumns: '1fr 42%', gap: '4rem', alignItems: 'start' }}
+      >
+
+        {/* Left — heading + service list */}
+        <div>
+          {/* Heading */}
+          <div className="mb-14">
+            <span
+              className="text-xs font-body tracking-widest uppercase mb-4 block"
+              style={{ color: '#FF4D00', letterSpacing: '0.2em' }}
+            >
+              What I Do
+            </span>
+            <h2
+              className="font-heading font-black leading-none"
               style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                objectPosition: SERVICES[hovered].objectPosition,
-                filter: 'brightness(0.75)',
+                fontFamily: "'Bricolage Grotesque', sans-serif",
+                fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
+                color: '#ffffff',
+                letterSpacing: '-0.03em',
               }}
-            />
-            {/* Light overlay so existing white content stays readable */}
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'rgba(255,255,255,0.55)',
-            }} />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* All original content — sits above the bg image */}
-      <div className="max-w-7xl mx-auto px-6" style={{ position: 'relative', zIndex: 1 }}>
-
-        {/* Heading */}
-        <div className="mb-16">
-          <span
-            className="text-xs font-body tracking-widest uppercase mb-4 block"
-            style={{ color: '#FF4D00', letterSpacing: '0.2em' }}
-          >
-            What I Do
-          </span>
-          <h2
-            className="font-heading font-black leading-none"
-            style={{
-              fontFamily: "'Bricolage Grotesque', sans-serif",
-              fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
-              color: '#0a0a0a',
-              letterSpacing: '-0.03em',
-            }}
-          >
-            SERVICES
-          </h2>
-        </div>
-
-        {/* Two-col layout: list left, thumbnail right */}
-        <div className="relative flex gap-16 items-start">
+            >
+              SERVICES
+            </h2>
+          </div>
 
           {/* Service list */}
-          <div className="flex-1">
-            {SERVICES.map((service, i) => (
-              <motion.div
-                key={service.number}
-                onHoverStart={() => setHovered(i)}
-                onHoverEnd={() => setHovered(null)}
-                className="group relative cursor-default"
-                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}
-              >
-                {/* Hover fill bg */}
-                <motion.div
-                  className="absolute inset-0 pointer-events-none"
-                  initial={false}
-                  animate={{ opacity: hovered === i ? 1 : 0 }}
+          {SERVICES.map((service, i) => (
+            <motion.div
+              key={service.number}
+              onHoverStart={() => setHovered(i)}
+              onHoverEnd={() => setHovered(null)}
+              className="cursor-default"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
+              animate={{ opacity: hovered === null || hovered === i ? 1 : 0.25 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="flex items-center gap-6 py-6 px-2">
+                {/* Number */}
+                <span
+                  style={{
+                    fontFamily: "'Outfit', sans-serif",
+                    fontSize: '0.72rem',
+                    letterSpacing: '0.12em',
+                    color: hovered === i ? '#FF4D00' : 'rgba(255,255,255,0.2)',
+                    flexShrink: 0,
+                    transition: 'color 0.3s',
+                  }}
+                >
+                  {service.number}
+                </span>
+
+                {/* Arrow — only active */}
+                <motion.span
+                  animate={{ opacity: hovered === i ? 1 : 0, x: hovered === i ? 0 : -8 }}
                   transition={{ duration: 0.25 }}
-                  style={{ background: 'rgba(255,77,0,0.03)' }}
-                />
+                  style={{
+                    fontFamily: "'Bricolage Grotesque', sans-serif",
+                    fontSize: 'clamp(1.6rem, 3.5vw, 3rem)',
+                    fontWeight: 900,
+                    color: '#ffffff',
+                    flexShrink: 0,
+                    lineHeight: 1,
+                  }}
+                >
+                  →
+                </motion.span>
 
-                <div className="relative flex items-center gap-6 py-7 px-2">
-                  {/* Number */}
-                  <span
-                    className="font-body tabular-nums flex-shrink-0 transition-colors duration-300"
-                    style={{
-                      fontSize: '0.75rem',
-                      letterSpacing: '0.1em',
-                      color: hovered === i ? '#FF4D00' : 'rgba(0,0,0,0.25)',
-                    }}
-                  >
-                    {service.number}
-                  </span>
+                {/* Title */}
+                <h3
+                  style={{
+                    fontFamily: "'Bricolage Grotesque', sans-serif",
+                    fontSize: 'clamp(1.8rem, 4vw, 3.5rem)',
+                    fontWeight: 900,
+                    letterSpacing: '-0.025em',
+                    color: '#ffffff',
+                    flex: 1,
+                    lineHeight: 1,
+                  }}
+                >
+                  {service.title}
+                </h3>
 
-                  {/* Title */}
-                  <motion.h3
-                    className="font-heading font-black leading-none flex-1 transition-colors duration-300"
-                    style={{
-                      fontFamily: "'Bricolage Grotesque', sans-serif",
-                      fontSize: 'clamp(1.8rem, 4vw, 3.5rem)',
-                      letterSpacing: '-0.02em',
-                      color: hovered === i ? '#FF4D00' : '#0a0a0a',
-                    }}
-                  >
-                    {service.title}
-                  </motion.h3>
-
-                  {/* Tags — slide in on hover */}
-                  <motion.div
-                    className="hidden md:flex gap-2 flex-shrink-0"
-                    initial={false}
-                    animate={{ opacity: hovered === i ? 1 : 0, x: hovered === i ? 0 : 12 }}
-                    transition={{ duration: 0.25 }}
-                  >
-                    {service.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="font-body text-xs px-3 py-1 rounded-full"
-                        style={{
-                          color: '#FF4D00',
-                          background: 'rgba(255,77,0,0.08)',
-                          border: '1px solid rgba(255,77,0,0.18)',
-                          letterSpacing: '0.05em',
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </motion.div>
-
-                  {/* Arrow */}
-                  <motion.span
-                    className="flex-shrink-0 text-2xl font-heading font-black leading-none"
-                    style={{ fontFamily: "'Bricolage Grotesque', sans-serif", color: '#FF4D00' }}
-                    initial={false}
-                    animate={{
-                      opacity: hovered === i ? 1 : 0,
-                      rotate: hovered === i ? 0 : -45,
-                    }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    ↗
-                  </motion.span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Sticky thumbnail panel */}
-          <div
-            className="hidden lg:block flex-shrink-0"
-            style={{ width: 280, position: 'sticky', top: '20vh' }}
-          >
-            <div style={{ position: 'relative', width: 280, height: 340 }}>
-              <AnimatePresence mode="wait">
-                {hovered !== null && (
-                  <motion.div
-                    key={hovered}
-                    initial={{ opacity: 0, y: 24, rotate: -4, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, rotate: -2, scale: 1 }}
-                    exit={{ opacity: 0, y: -16, rotate: 2, scale: 0.96 }}
-                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      borderRadius: 20,
-                      overflow: 'hidden',
-                      boxShadow: '0 30px 60px rgba(0,0,0,0.18)',
-                    }}
-                  >
-                    <img
-                      src={SERVICES[hovered].thumb}
-                      alt={SERVICES[hovered].title}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        objectPosition: SERVICES[hovered].objectPosition,
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: 'absolute',
-                        bottom: 0, left: 0, right: 0,
-                        padding: '1.5rem',
-                        background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
-                      }}
-                    >
-                      <p
-                        className="text-white font-heading font-bold text-sm"
-                        style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
-                      >
-                        {SERVICES[hovered].title}
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Placeholder when nothing hovered */}
-              <AnimatePresence>
-                {hovered === null && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      borderRadius: 20,
-                      border: '2px dashed rgba(0,0,0,0.08)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
+                {/* Tags — slide in on hover */}
+                <motion.div
+                  className="hidden md:flex gap-2 flex-shrink-0"
+                  animate={{ opacity: hovered === i ? 1 : 0, x: hovered === i ? 0 : 12 }}
+                  transition={{ duration: 0.25 }}
+                >
+                  {service.tags.map((tag) => (
                     <span
-                      className="font-body text-sm"
-                      style={{ color: 'rgba(0,0,0,0.2)', letterSpacing: '0.05em' }}
+                      key={tag}
+                      style={{
+                        fontFamily: "'Outfit', sans-serif",
+                        fontSize: '0.7rem',
+                        color: '#FF4D00',
+                        background: 'rgba(255,77,0,0.08)',
+                        border: '1px solid rgba(255,77,0,0.2)',
+                        padding: '3px 12px',
+                        borderRadius: 999,
+                        letterSpacing: '0.05em',
+                      }}
                     >
-                      hover a service
+                      {tag}
                     </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
+                  ))}
+                </motion.div>
+              </div>
+            </motion.div>
+          ))}
         </div>
+
+        {/* Right — full image panel, no card, no opacity */}
+        <div
+          className="hidden lg:block"
+          style={{ position: 'sticky', top: '15vh', height: '60vh', borderRadius: 12, overflow: 'hidden' }}
+        >
+          <AnimatePresence mode="wait">
+            {hovered !== null ? (
+              <motion.img
+                key={hovered}
+                src={SERVICES[hovered].thumb}
+                alt={SERVICES[hovered].title}
+                initial={{ opacity: 0, scale: 1.06 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.97 }}
+                transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  objectPosition: SERVICES[hovered].objectPosition,
+                  display: 'block',
+                }}
+              />
+            ) : (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  background: '#111111',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: 12,
+                }}
+              >
+                <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: '0.8rem', color: 'rgba(255,255,255,0.15)', letterSpacing: '0.08em' }}>
+                  hover a service
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
       </div>
     </section>
   )
