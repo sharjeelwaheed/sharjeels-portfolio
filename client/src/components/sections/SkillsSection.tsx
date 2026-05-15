@@ -37,30 +37,31 @@ function SkillBar({ skill }: { skill: Skill }) {
 }
 
 // devicon slug map for logo images
-const DEVICON: Record<string, string> = {
-  'React': 'react',
-  'Node.js': 'nodejs',
-  'MongoDB': 'mongodb',
-  'TypeScript': 'typescript',
-  'JavaScript': 'javascript',
-  'Express.js': 'express',
-  'Tailwind CSS': 'tailwindcss',
-  'Framer Motion': 'framermotion',
-  'Firebase': 'firebase',
-  'HTML & CSS': 'html5',
-  'Git & GitHub': 'github',
-  'Socket.io': 'socketio',
-  'Figma': 'figma',
-  'Python': 'python',
-  'PostgreSQL': 'postgresql',
-  'Supabase': 'supabase',
-  'Vite': 'vitejs',
-  'Docker': 'docker',
+// slug → [variant, needsInvert]
+// needsInvert: true for icons that are black/dark and need inverting on dark bg
+const DEVICON: Record<string, [string, boolean]> = {
+  'React':         ['react/react-original',                   false],
+  'Node.js':       ['nodejs/nodejs-original',                 false],
+  'MongoDB':       ['mongodb/mongodb-original',               false],
+  'TypeScript':    ['typescript/typescript-original',         false],
+  'JavaScript':    ['javascript/javascript-original',         false],
+  'Express.js':    ['express/express-original',               true ],  // black on transparent
+  'Tailwind CSS':  ['tailwindcss/tailwindcss-original',       false],
+  'Firebase':      ['firebase/firebase-original',             false],
+  'HTML & CSS':    ['html5/html5-original',                   false],
+  'Git & GitHub':  ['github/github-original',                 true ],  // black octocat
+  'Socket.io':     ['socketio/socketio-original',             true ],  // black on transparent
+  'Figma':         ['figma/figma-original',                   false],
+  'Python':        ['python/python-original',                 false],
+  'PostgreSQL':    ['postgresql/postgresql-original',         false],
+  'Vite':          ['vitejs/vitejs-original',                 false],
+  'Docker':        ['docker/docker-original',                 false],
+  'Supabase':      ['supabase/supabase-original',             false],
 }
 
 function SkillIcon({ skill }: { skill: Skill }) {
   const color = TECH_COLORS[skill.name] || '#FF4D00'
-  const slug = DEVICON[skill.name]
+  const deviconEntry = DEVICON[skill.name]
   const initials = skill.name.split(/[\s.]+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase()
 
   return (
@@ -76,16 +77,20 @@ function SkillIcon({ skill }: { skill: Skill }) {
           border: `1px solid ${color}30`,
         }}
       >
-        {slug ? (
+        {deviconEntry ? (
           <img
-            src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${slug}/${slug}-original.svg`}
+            src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${deviconEntry[0]}.svg`}
             alt={skill.name}
-            style={{ width: 32, height: 32, objectFit: 'contain' }}
+            style={{
+              width: 32, height: 32, objectFit: 'contain',
+              filter: deviconEntry[1] ? 'brightness(0) invert(1)' : 'none',
+            }}
             onError={e => {
-              // fallback to plain svg variant if original doesn't exist
+              // fallback to plain variant
               const img = e.currentTarget
-              if (!img.src.includes('plain')) {
-                img.src = `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${slug}/${slug}-plain.svg`
+              const base = deviconEntry[0].replace('-original', '-plain')
+              if (!img.src.includes('-plain')) {
+                img.src = `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${base}.svg`
               }
             }}
           />
