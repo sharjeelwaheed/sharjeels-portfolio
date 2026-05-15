@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { motion, useScroll, useMotionValueEvent, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const SERVICES = [
   {
@@ -8,8 +8,6 @@ const SERVICES = [
     tags: ['React', 'Node.js', 'MongoDB'],
     thumb: '/images/fullstack_cover.png',
     objectPosition: 'center center',
-    description: 'End-to-end web applications built with modern frameworks, scalable APIs, and production-ready deployment pipelines.',
-    category: 'Development',
   },
   {
     number: '02',
@@ -17,8 +15,6 @@ const SERVICES = [
     tags: ['Figma', 'Framer Motion', 'Tailwind'],
     thumb: '/images/uiux-cover.jpeg',
     objectPosition: 'center top',
-    description: 'Pixel-perfect interfaces with intentional interactions, clean layouts, and delightful micro-animations.',
-    category: 'Design',
   },
   {
     number: '03',
@@ -26,8 +22,6 @@ const SERVICES = [
     tags: ['Groq', 'OpenAI', 'LLM'],
     thumb: '/images/haqooqi-cover.png',
     objectPosition: 'center center',
-    description: 'Intelligent features powered by large language models — chatbots, smart search, and automation pipelines.',
-    category: 'AI & ML',
   },
   {
     number: '04',
@@ -35,8 +29,6 @@ const SERVICES = [
     tags: ['Express.js', 'JWT', 'Supabase'],
     thumb: '/images/backend_engineering.png',
     objectPosition: 'center center',
-    description: 'Robust REST APIs, authentication systems, and database architecture that scales gracefully under load.',
-    category: 'Engineering',
   },
   {
     number: '05',
@@ -44,277 +36,244 @@ const SERVICES = [
     tags: ['Vite', 'Lighthouse', 'Web Vitals'],
     thumb: '/images/performance_optimization.png',
     objectPosition: 'center center',
-    description: 'Sub-second load times, Lighthouse 100 scores, and silky 60fps animations across every device.',
-    category: 'Optimization',
   },
 ]
 
 export default function ServicesSection() {
-  const sectionRef = useRef<HTMLDivElement>(null)
-  const [scrollActive, setScrollActive] = useState(0)
   const [hovered, setHovered] = useState<number | null>(null)
-
-  const activeIndex = hovered !== null ? hovered : scrollActive
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start start', 'end end'],
-  })
-
-  useMotionValueEvent(scrollYProgress, 'change', (v) => {
-    const idx = Math.min(SERVICES.length - 1, Math.floor(v * SERVICES.length))
-    setScrollActive(idx)
-  })
-
-  const active = SERVICES[activeIndex]
+  const sectionRef = useRef<HTMLDivElement>(null)
 
   return (
     <section
       id="services"
       ref={sectionRef}
-      style={{ height: `${(SERVICES.length + 1) * 100}vh`, position: 'relative' }}
+      style={{ position: 'relative', background: '#ffffff', padding: 'clamp(5rem,10vw,8rem) 0', overflow: 'hidden' }}
     >
-      <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' }}>
-
-        {/* ── Background image crossfade ─────────────────────────── */}
-        <AnimatePresence mode="wait">
+      {/* Full-screen background image — appears on hover */}
+      <AnimatePresence mode="wait">
+        {hovered !== null && (
           <motion.div
-            key={activeIndex}
-            initial={{ opacity: 0, scale: 1.06 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.97 }}
-            transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
-            style={{ position: 'absolute', inset: 0 }}
+            key={hovered}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            style={{ position: 'absolute', inset: 0, zIndex: 0 }}
           >
             <img
-              src={active.thumb}
+              src={SERVICES[hovered].thumb}
               alt=""
               style={{
-                width: '100%', height: '100%',
+                width: '100%',
+                height: '100%',
                 objectFit: 'cover',
-                objectPosition: active.objectPosition,
-                filter: 'brightness(0.45) saturate(0.8)',
+                objectPosition: SERVICES[hovered].objectPosition,
+                filter: 'brightness(0.75)',
               }}
             />
+            {/* Light overlay so existing white content stays readable */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              background: 'rgba(255,255,255,0.55)',
+            }} />
           </motion.div>
-        </AnimatePresence>
+        )}
+      </AnimatePresence>
 
-        {/* Gradient overlays */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to right, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.6) 55%, rgba(0,0,0,0.25) 100%)',
-        }} />
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.55) 100%)',
-        }} />
+      {/* All original content — sits above the bg image */}
+      <div className="max-w-7xl mx-auto px-6" style={{ position: 'relative', zIndex: 1 }}>
 
-        {/* Active color glow accent */}
-        <motion.div
-          key={`glow-${activeIndex}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6 }}
-          style={{
-            position: 'absolute',
-            bottom: 0, left: 0, right: 0,
-            height: '40%',
-            background: 'linear-gradient(to top, rgba(255,77,0,0.07), transparent)',
-            pointerEvents: 'none',
-          }}
-        />
-
-        {/* ── Main content layout ────────────────────────────────── */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', alignItems: 'center',
-        }}>
-          <div
-            className="max-w-7xl mx-auto px-6 w-full"
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr', gap: '5rem', alignItems: 'center' }}
+        {/* Heading */}
+        <div className="mb-16">
+          <span
+            className="text-xs font-body tracking-widest uppercase mb-4 block"
+            style={{ color: '#FF4D00', letterSpacing: '0.2em' }}
           >
+            What I Do
+          </span>
+          <h2
+            className="font-heading font-black leading-none"
+            style={{
+              fontFamily: "'Bricolage Grotesque', sans-serif",
+              fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
+              color: '#0a0a0a',
+              letterSpacing: '-0.03em',
+            }}
+          >
+            SERVICES
+          </h2>
+        </div>
 
-            {/* Left column — heading + active description */}
-            <div>
-              <span
-                className="text-xs font-body tracking-widest uppercase mb-5 block"
-                style={{ color: '#FF4D00', letterSpacing: '0.2em' }}
-              >
-                What I Do
-              </span>
-              <h2
-                style={{
-                  fontFamily: "'Bricolage Grotesque', sans-serif",
-                  fontSize: 'clamp(2.8rem, 6vw, 5rem)',
-                  fontWeight: 900,
-                  color: '#ffffff',
-                  letterSpacing: '-0.03em',
-                  lineHeight: 1,
-                  marginBottom: '2rem',
-                }}
-              >
-                SERVICES
-              </h2>
+        {/* Two-col layout: list left, thumbnail right */}
+        <div className="relative flex gap-16 items-start">
 
-              {/* Active service detail */}
-              <AnimatePresence mode="wait">
+          {/* Service list */}
+          <div className="flex-1">
+            {SERVICES.map((service, i) => (
+              <motion.div
+                key={service.number}
+                onHoverStart={() => setHovered(i)}
+                onHoverEnd={() => setHovered(null)}
+                className="group relative cursor-default"
+                style={{ borderBottom: '1px solid rgba(0,0,0,0.08)' }}
+              >
+                {/* Hover fill bg */}
                 <motion.div
-                  key={activeIndex}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -14 }}
-                  transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <span
-                    className="font-body text-xs tracking-widest uppercase block mb-3"
-                    style={{ color: '#FF4D00', letterSpacing: '0.15em' }}
-                  >
-                    {active.category}
-                  </span>
-                  <p
-                    className="font-body leading-relaxed"
-                    style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.95rem', maxWidth: 360 }}
-                  >
-                    {active.description}
-                  </p>
+                  className="absolute inset-0 pointer-events-none"
+                  initial={false}
+                  animate={{ opacity: hovered === i ? 1 : 0 }}
+                  transition={{ duration: 0.25 }}
+                  style={{ background: 'rgba(255,77,0,0.03)' }}
+                />
 
-                  {/* Tags */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '1.4rem' }}>
-                    {active.tags.map(tag => (
+                <div className="relative flex items-center gap-6 py-7 px-2">
+                  {/* Number */}
+                  <span
+                    className="font-body tabular-nums flex-shrink-0 transition-colors duration-300"
+                    style={{
+                      fontSize: '0.75rem',
+                      letterSpacing: '0.1em',
+                      color: hovered === i ? '#FF4D00' : 'rgba(0,0,0,0.25)',
+                    }}
+                  >
+                    {service.number}
+                  </span>
+
+                  {/* Title */}
+                  <motion.h3
+                    className="font-heading font-black leading-none flex-1 transition-colors duration-300"
+                    style={{
+                      fontFamily: "'Bricolage Grotesque', sans-serif",
+                      fontSize: 'clamp(1.8rem, 4vw, 3.5rem)',
+                      letterSpacing: '-0.02em',
+                      color: hovered === i ? '#FF4D00' : '#0a0a0a',
+                    }}
+                  >
+                    {service.title}
+                  </motion.h3>
+
+                  {/* Tags — slide in on hover */}
+                  <motion.div
+                    className="hidden md:flex gap-2 flex-shrink-0"
+                    initial={false}
+                    animate={{ opacity: hovered === i ? 1 : 0, x: hovered === i ? 0 : 12 }}
+                    transition={{ duration: 0.25 }}
+                  >
+                    {service.tags.map((tag) => (
                       <span
                         key={tag}
+                        className="font-body text-xs px-3 py-1 rounded-full"
                         style={{
-                          fontFamily: "'Outfit', sans-serif",
-                          fontSize: '0.72rem',
                           color: '#FF4D00',
-                          background: 'rgba(255,77,0,0.1)',
-                          border: '1px solid rgba(255,77,0,0.25)',
-                          padding: '4px 14px',
-                          borderRadius: 999,
+                          background: 'rgba(255,77,0,0.08)',
+                          border: '1px solid rgba(255,77,0,0.18)',
                           letterSpacing: '0.05em',
-                          backdropFilter: 'blur(8px)',
                         }}
                       >
                         {tag}
                       </span>
                     ))}
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+                  </motion.div>
 
-            {/* Right column — service list */}
-            <div>
-              {SERVICES.map((service, i) => {
-                const isActive = i === activeIndex
-                return (
-                  <motion.div
-                    key={service.number}
-                    onMouseEnter={() => setHovered(i)}
-                    onMouseLeave={() => setHovered(null)}
+                  {/* Arrow */}
+                  <motion.span
+                    className="flex-shrink-0 text-2xl font-heading font-black leading-none"
+                    style={{ fontFamily: "'Bricolage Grotesque', sans-serif", color: '#FF4D00' }}
+                    initial={false}
                     animate={{
-                      opacity: isActive ? 1 : 0.28,
-                      x: isActive ? 8 : 0,
+                      opacity: hovered === i ? 1 : 0,
+                      rotate: hovered === i ? 0 : -45,
                     }}
-                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    ↗
+                  </motion.span>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Sticky thumbnail panel */}
+          <div
+            className="hidden lg:block flex-shrink-0"
+            style={{ width: 280, position: 'sticky', top: '20vh' }}
+          >
+            <div style={{ position: 'relative', width: 280, height: 340 }}>
+              <AnimatePresence mode="wait">
+                {hovered !== null && (
+                  <motion.div
+                    key={hovered}
+                    initial={{ opacity: 0, y: 24, rotate: -4, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, rotate: -2, scale: 1 }}
+                    exit={{ opacity: 0, y: -16, rotate: 2, scale: 0.96 }}
+                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                     style={{
-                      borderBottom: '1px solid rgba(255,255,255,0.07)',
-                      cursor: 'default',
+                      position: 'absolute',
+                      inset: 0,
+                      borderRadius: 20,
+                      overflow: 'hidden',
+                      boxShadow: '0 30px 60px rgba(0,0,0,0.18)',
                     }}
                   >
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '1.2rem',
-                      padding: '1.25rem 0',
-                    }}>
-                      {/* Number */}
-                      <motion.span
-                        animate={{ color: isActive ? '#FF4D00' : 'rgba(255,255,255,0.2)' }}
-                        transition={{ duration: 0.35 }}
-                        style={{
-                          fontFamily: "'Outfit', sans-serif",
-                          fontSize: '0.72rem',
-                          letterSpacing: '0.12em',
-                          flexShrink: 0,
-                          width: '2rem',
-                        }}
+                    <img
+                      src={SERVICES[hovered].thumb}
+                      alt={SERVICES[hovered].title}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        objectPosition: SERVICES[hovered].objectPosition,
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: 0, left: 0, right: 0,
+                        padding: '1.5rem',
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 100%)',
+                      }}
+                    >
+                      <p
+                        className="text-white font-heading font-bold text-sm"
+                        style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
                       >
-                        {service.number}
-                      </motion.span>
-
-                      {/* Title */}
-                      <motion.h3
-                        animate={{
-                          fontSize: isActive ? 'clamp(1.6rem, 3.2vw, 2.8rem)' : 'clamp(1.2rem, 2.4vw, 2rem)',
-                        }}
-                        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-                        style={{
-                          fontFamily: "'Bricolage Grotesque', sans-serif",
-                          fontWeight: 900,
-                          letterSpacing: '-0.025em',
-                          color: '#ffffff',
-                          flex: 1,
-                          lineHeight: 1,
-                        }}
-                      >
-                        {service.title}
-                      </motion.h3>
-
-                      {/* Arrow */}
-                      <motion.span
-                        animate={{
-                          opacity: isActive ? 1 : 0,
-                          x: isActive ? 0 : -10,
-                          rotate: isActive ? 0 : -45,
-                        }}
-                        transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-                        style={{
-                          fontFamily: "'Bricolage Grotesque', sans-serif",
-                          fontSize: '1.5rem',
-                          fontWeight: 900,
-                          color: '#FF4D00',
-                          flexShrink: 0,
-                        }}
-                      >
-                        ↗
-                      </motion.span>
+                        {SERVICES[hovered].title}
+                      </p>
                     </div>
                   </motion.div>
-                )
-              })}
-            </div>
+                )}
+              </AnimatePresence>
 
+              {/* Placeholder when nothing hovered */}
+              <AnimatePresence>
+                {hovered === null && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      borderRadius: 20,
+                      border: '2px dashed rgba(0,0,0,0.08)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <span
+                      className="font-body text-sm"
+                      style={{ color: 'rgba(0,0,0,0.2)', letterSpacing: '0.05em' }}
+                    >
+                      hover a service
+                    </span>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
-
-        {/* Scroll hint — fades out after first item */}
-        <motion.div
-          animate={{ opacity: scrollActive === 0 && hovered === null ? 1 : 0 }}
-          transition={{ duration: 0.4 }}
-          style={{
-            position: 'absolute',
-            bottom: '2.5rem',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: '0.4rem',
-            pointerEvents: 'none',
-          }}
-        >
-          <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>
-            Scroll to explore
-          </span>
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ width: 1, height: 32, background: 'linear-gradient(to bottom, rgba(255,77,0,0.6), transparent)' }}
-          />
-        </motion.div>
-
       </div>
     </section>
   )
