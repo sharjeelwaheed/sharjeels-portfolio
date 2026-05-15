@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { motion, useInView } from 'framer-motion'
 import { useInView as useInViewObs } from 'react-intersection-observer'
 import GlassCard from '@/components/ui/GlassCard'
+import { staggerContainer, scaleUp } from '@/utils/animations'
 import { TECH_COLORS, SKILL_CATEGORIES } from '@/utils/constants'
 import api from '@/utils/api'
 
@@ -35,6 +36,31 @@ function SkillBar({ skill }: { skill: Skill }) {
   )
 }
 
+function SkillIcon({ skill }: { skill: Skill }) {
+  const color = TECH_COLORS[skill.name] || '#FF4D00'
+  const initials = skill.name.split(/[\s.]+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+
+  return (
+    <motion.div
+      variants={scaleUp}
+      whileHover={{ rotate: 8, scale: 1.12 }}
+      className="flex flex-col items-center gap-2"
+    >
+      <div
+        className="w-14 h-14 rounded-2xl flex items-center justify-center font-heading font-bold text-sm"
+        style={{
+          background: `${color}15`,
+          border: `1px solid ${color}30`,
+          color: color,
+        }}
+      >
+        {initials}
+      </div>
+      <span className="text-white/50 text-xs font-body text-center leading-tight">{skill.name}</span>
+    </motion.div>
+  )
+}
+
 export default function SkillsSection() {
   const [skills, setSkills] = useState<Skill[]>([])
   const headingRef = useRef(null)
@@ -53,21 +79,20 @@ export default function SkillsSection() {
   const backendSkills = [...(grouped['backend'] || []), ...(grouped['database'] || []), ...(grouped['tools'] || [])]
 
   return (
-    <section id="skills" style={{ background: '#080808', padding: 'clamp(5rem,10vw,8rem) 0', overflow: 'hidden' }}>
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="skills" className="section-padding bg-primary">
+      <div className="max-w-7xl mx-auto">
 
-        {/* Big animated heading — inspo style */}
-        <div ref={headingRef} className="mb-16">
+        {/* Big animated heading */}
+        <div ref={headingRef} className="mb-12">
           <motion.span
             initial={{ opacity: 0, x: -16 }}
             animate={headingInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5 }}
-            className="text-xs font-body tracking-widest uppercase mb-6 block"
+            className="text-xs font-body tracking-widest uppercase mb-4 block"
             style={{ color: '#FF4D00', letterSpacing: '0.2em' }}
           >
             Expertise
           </motion.span>
-
           <div style={{ overflow: 'hidden' }}>
             <motion.h2
               initial={{ y: '110%' }}
@@ -97,7 +122,6 @@ export default function SkillsSection() {
                 fontSize: 'clamp(4.5rem, 13vw, 11rem)',
                 fontWeight: 900,
                 lineHeight: 0.88,
-                letterSpacing: '-0.04em',
                 background: 'linear-gradient(135deg, #ffffff 40%, rgba(255,255,255,0.4) 100%)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
@@ -108,6 +132,19 @@ export default function SkillsSection() {
             </motion.h2>
           </div>
         </div>
+
+        {/* Icon Grid */}
+        <motion.div
+          className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-12 gap-6 mb-16"
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+        >
+          {skills.map((skill) => (
+            <SkillIcon key={skill._id} skill={skill} />
+          ))}
+        </motion.div>
 
         {/* Skill Bars */}
         <div className="grid md:grid-cols-2 gap-8">
