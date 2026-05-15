@@ -37,32 +37,34 @@ function SkillBar({ skill }: { skill: Skill }) {
 }
 
 // devicon slug map for logo images
-// slug → [variant, needsInvert]
-// needsInvert: true for icons that are black/dark and need inverting on dark bg
-const DEVICON: Record<string, [string, boolean]> = {
-  'React':         ['react/react-original',                   false],
-  'Node.js':       ['nodejs/nodejs-original',                 false],
-  'MongoDB':       ['mongodb/mongodb-original',               false],
-  'TypeScript':    ['typescript/typescript-original',         false],
-  'JavaScript':    ['javascript/javascript-original',         false],
-  'Express.js':    ['express/express-original',               true ],  // black on transparent
-  'Tailwind CSS':  ['tailwindcss/tailwindcss-original',       false],
-  'Firebase':      ['firebase/firebase-original',             false],
-  'HTML & CSS':    ['html5/html5-original',                   false],
-  'Git & GitHub':  ['github/github-original',                 true ],  // black octocat
-  'Socket.io':     ['socketio/socketio-original',             true ],  // black on transparent
-  'Figma':         ['figma/figma-original',                   false],
-  'Python':        ['python/python-original',                 false],
-  'PostgreSQL':    ['postgresql/postgresql-original',         false],
-  'Vite':          ['vitejs/vitejs-original',                 false],
-  'Docker':        ['docker/docker-original',                 false],
-  'Supabase':      ['supabase/supabase-original',             false],
+// simple-icons slug — color is passed as hex without # to get brand color
+// For dark/black icons pass 'ffffff' to make them white
+const SIMPLE_ICONS: Record<string, string> = {
+  'React':         'react/61DAFB',
+  'Node.js':       'nodedotjs/3C873A',
+  'MongoDB':       'mongodb/47A248',
+  'TypeScript':    'typescript/3178C6',
+  'JavaScript':    'javascript/F7DF1E',
+  'Express.js':    'express/ffffff',
+  'Tailwind CSS':  'tailwindcss/38BDF8',
+  'Framer Motion': 'framer/BB4B96',
+  'Firebase':      'firebase/FFA611',
+  'HTML & CSS':    'html5/E34F26',
+  'Git & GitHub':  'github/ffffff',
+  'Socket.io':     'socketdotio/ffffff',
+  'Figma':         'figma/F24E1E',
+  'Python':        'python/3776AB',
+  'PostgreSQL':    'postgresql/336791',
+  'Supabase':      'supabase/3ECF8E',
+  'Vite':          'vite/646CFF',
+  'Docker':        'docker/2496ED',
 }
 
 function SkillIcon({ skill }: { skill: Skill }) {
   const color = TECH_COLORS[skill.name] || '#FF4D00'
-  const deviconEntry = DEVICON[skill.name]
+  const iconSlug = SIMPLE_ICONS[skill.name]
   const initials = skill.name.split(/[\s.]+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase()
+  const [iconUrl, iconColor] = iconSlug ? iconSlug.split('/') : ['', '']
 
   return (
     <motion.div
@@ -77,22 +79,12 @@ function SkillIcon({ skill }: { skill: Skill }) {
           border: `1px solid ${color}30`,
         }}
       >
-        {deviconEntry ? (
+        {iconSlug ? (
           <img
-            src={`https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${deviconEntry[0]}.svg`}
+            src={`https://cdn.simpleicons.org/${iconUrl}/${iconColor}`}
             alt={skill.name}
-            style={{
-              width: 32, height: 32, objectFit: 'contain',
-              filter: deviconEntry[1] ? 'brightness(0) invert(1)' : 'none',
-            }}
-            onError={e => {
-              // fallback to plain variant
-              const img = e.currentTarget
-              const base = deviconEntry[0].replace('-original', '-plain')
-              if (!img.src.includes('-plain')) {
-                img.src = `https://cdn.jsdelivr.net/gh/devicons/devicon/icons/${base}.svg`
-              }
-            }}
+            style={{ width: 30, height: 30, objectFit: 'contain' }}
+            onError={e => { e.currentTarget.style.display = 'none' }}
           />
         ) : (
           <span style={{ fontFamily: "'Outfit', sans-serif", fontSize: '0.75rem', fontWeight: 700, color }}>{initials}</span>
