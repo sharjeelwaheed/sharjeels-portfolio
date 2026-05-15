@@ -49,7 +49,7 @@ export default function ContactSection() {
       <div className="max-w-7xl mx-auto px-6">
 
         {/* Heading */}
-        <div ref={headingRef} className="mb-16">
+        <div ref={headingRef} className="mb-16" style={{ textAlign: 'center' }}>
           <motion.span
             initial={{ opacity: 0, x: -16 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
@@ -69,6 +69,7 @@ export default function ContactSection() {
               fontSize: 'clamp(2.8rem, 7vw, 5.5rem)',
               color: '#0a0a0a',
               letterSpacing: '-0.03em',
+              textAlign: 'center',
             }}
           >
             LET'S BUILD<br />

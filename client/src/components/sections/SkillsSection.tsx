@@ -159,8 +159,8 @@ export default function SkillsSection() {
                 fontWeight: 900,
                 lineHeight: 0.88,
                 letterSpacing: '-0.04em',
-                color: 'rgba(255,255,255,0.18)',
-                WebkitTextStroke: '1.5px rgba(255,255,255,0.55)',
+                color: '#ffffff',
+                WebkitTextStroke: 'unset',
                 display: 'block',
               }}
             >
